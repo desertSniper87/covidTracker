@@ -47,9 +47,17 @@ var x = d3.scaleTime().range([0, width]);
 var y = d3.scaleLinear().range([height, 0]);
 
 // define the line
-var valueline = d3.line()
+var valueline_confirmed = d3.line()
     .x(function(d) { return x(d.Date); })
     .y(function(d) { return y(d.Confirmed); });
+
+var valueline_deaths = d3.line()
+    .x(function(d) { return x(d.Date); })
+    .y(function(d) { return y(d.Deaths); });
+
+var valueline_recovered = d3.line()
+    .x(function(d) { return x(d.Date); })
+    .y(function(d) { return y(d.Recovered); });
 
 // append the svg obgect to the body of the page
 // appends a 'group' element to 'svg'
@@ -62,23 +70,41 @@ var svg = d3.select("body").append("svg")
           "translate(" + margin.left + "," + margin.top + ")");
 
 // Get the data
+
+function populateData(){
+}
 d3.csv("COVID-19_in_bd.csv").then(function(data) {
 
   // format the data
   data.forEach(function(d) {
       d.Date = parseTime(d.Date);
       d.Confirmed = +d.Confirmed;
+      d.Deaths= +d.Deaths;
+      d.Recovered= +d.Recovered;
   });
 
   // Scale the range of the data
   x.domain(d3.extent(data, function(d) { return d.Date; }));
-  y.domain([0, d3.max(data, function(d) { return d.Confirmed; })]);
+  y.domain([0, d3.max(data, function(d) { 
+    return Math.max(d.Confirmed, d.Recovered, d.Deaths)})]);
 
   // Add the valueline path.
   svg.append("path")
       .data([data])
       .attr("class", "line")
-      .attr("d", valueline);
+      .attr("d", valueline_confirmed);
+
+  svg.append("path")
+      .data([data])
+      .attr("class", "line")
+      .style("stroke", "red")
+      .attr("d", valueline_deaths);
+
+  svg.append("path")
+      .data([data])
+      .attr("class", "line")
+      .style("stroke", "green")
+      .attr("d", valueline_recovered);
 
   // Add the x Axis
   svg.append("g")
