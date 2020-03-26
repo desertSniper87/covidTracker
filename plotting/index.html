@@ -30,7 +30,8 @@ body {
 
 <div id="svg"></div>
 <!-- load the d3.js library -->    	
-<script src="https://d3js.org/d3.v5.min.js"></script>
+<!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
+<script src="https://d3js.org/d3.v5.js"></script>
 <script>
 
 // set the dimensions and margins of the graph
@@ -88,22 +89,43 @@ d3.csv("COVID-19_in_bd.csv").then(function(data) {
   y.domain([0, d3.max(data, function(d) { 
     return Math.max(d.Confirmed, d.Recovered, d.Deaths)})]);
 
+  colors = {
+    "Confirmed": "#000000",
+    "Deaths": "#FC0303",
+    "Recovered": "#00FF00"
+  }
+
+  /*
+   *var colorArray = Object.keys(colors).map(function(key) {
+   *  return [{
+   *    "name": key,
+   *    "value": colors[key]
+   *  }];
+   *});
+   */
+   legendScale = d3.scaleOrdinal()
+       .domain(Object.keys(colors))
+       .range(Object.values(colors));
+
+
   // Add the valueline path.
   svg.append("path")
       .data([data])
       .attr("class", "line")
+      .style("stroke", colors["Confirmed"])
       .attr("d", valueline_confirmed);
 
   svg.append("path")
       .data([data])
       .attr("class", "line")
-      .style("stroke", "red")
+      .style("stroke", colors["Deaths"])
       .attr("d", valueline_deaths);
 
   svg.append("path")
       .data([data])
       .attr("class", "line")
       .style("stroke", "green")
+      .style("stroke", colors["Recovered"])
       .attr("d", valueline_recovered);
 
   // Add the x Axis
@@ -119,7 +141,33 @@ d3.csv("COVID-19_in_bd.csv").then(function(data) {
         .attr('y', -5)             
         .text('Data taken from https://github.com/datasticslab'); 
 
+  var group = d3.select("svg").append("g")
+      .attr("class","legend-group");
+
+  var legend = group.selectAll(".legend")
+      .data(legendScale.domain().slice())
+    .enter().append("g")
+      .attr("class","legend")
+      .attr("transform",function(d,i) {
+        return "translate(0," + i * 20 + ")";
+      });
+
+  legend.append("rect")
+      .attr("x",475)
+      .attr("y",65)
+      .attr("width",18)
+      .attr("height",18)
+      .style("fill", legendScale);
+
+  legend.append("text")
+      .attr("x",465)
+      .attr("y",73)
+      .attr("dy",".35em")
+      .style("text-anchor","end")
+      .text(function(d) { return d; });
+
 });
+
 
 </script>
 </body>
