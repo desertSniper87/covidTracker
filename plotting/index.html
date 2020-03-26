@@ -26,7 +26,7 @@ body {
 div.tooltip {	
     position: absolute;			
     text-align: center;			
-    width: 60px;					
+    width: 80px;					
     height: 28px;					
     padding: 2px;				
     font: 12px sans-serif;		
@@ -342,18 +342,18 @@ var populateData = function(country){
           .attr('y', -5)             
           .text('Data taken from https://github.com/datasticslab'); 
 
-    // Add the scatterplot
     svg.selectAll("dot")	
         .data(data)			
-    .enter().append("circle")								
+        .enter().append("circle")								
         .attr("r", 5)		
         .attr("cx", function(d) { return x(d.Date); })		 
         .attr("cy", function(d) { return y(d.Confirmed); })		
+        .style("fill", colors["Confirmed"])
         .on("mouseover", function(d) {		
             div.transition()		
                 .duration(200)		
                 .style("opacity", .9);		
-            div	.html(formatDateToString (d.Date) + "<br/>"  + d.Confirmed)	
+            div	.html(formatDateToString (d.Date) + "<br/>"  + d.Confirmed + " Confirmed")	
                 .style("left", (d3.event.pageX) + "px")		
                 .style("top", (d3.event.pageY - 28) + "px");	
             })					
@@ -362,6 +362,50 @@ var populateData = function(country){
                 .duration(500)		
                 .style("opacity", 0);	
         });
+
+    svg.selectAll("dot")	
+        .data(data)			
+        .enter().append("circle")								
+        .attr("r", 5)		
+        .attr("cx", function(d) { return x(d.Date); })		 
+        .attr("cy", function(d) { return y(d.Deaths); })		
+        .style("fill", colors["Deaths"])
+        .on("mouseover", function(d) {		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div	.html(formatDateToString (d.Date) + "<br/>"  + d.Deaths + " Deaths")	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px");	
+            })					
+        .on("mouseout", function(d) {		
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+        });
+
+
+      svg.selectAll("dot")	
+          .data(data)			
+          .enter().append("circle")								
+          .attr("r", 5)		
+          .attr("cx", function(d) { return x(d.Date); })		 
+          .attr("cy", function(d) { return y(d.Recovered); })		
+          .style("fill", colors["Recovered"])
+          .on("mouseover", function(d) {		
+              div.transition()		
+                  .duration(200)		
+                  .style("opacity", .9);		
+              div	.html(formatDateToString (d.Date) + "<br/>"  + d.Recovered + " Recovered")	
+                  .style("left", (d3.event.pageX) + "px")		
+                  .style("top", (d3.event.pageY - 28) + "px");	
+              })					
+          .on("mouseout", function(d) {		
+              div.transition()		
+                  .duration(500)		
+                  .style("opacity", 0);	
+          });
+
 
     var group = d3.select("svg").append("g")
         .attr("class","legend-group");
