@@ -26,7 +26,189 @@ body {
 </style>
 <body>
 
-<h4>Cases in Bangladesh</h4>
+<h4>Cases in The world</h4>
+
+<label for="cars">Choose a country:</label>
+
+<select id="country" onchange="populateData(this.value)">
+  <option value="Afghanistan">Afghanistan</option>
+  <option value="Angola">Angola</option>
+  <option value="Albania">Albania</option>
+  <option value="United Arab Emirates">United Arab Emirates</option>
+  <option value="Argentina">Argentina</option>
+  <option value="Armenia">Armenia</option>
+  <option value="Antarctica">Antarctica</option>
+  <option value="French Southern and Antarctic Lands">French Southern and Antarctic Lands</option>
+  <option value="Australia">Australia</option>
+  <option value="Austria">Austria</option>
+  <option value="Azerbaijan">Azerbaijan</option>
+  <option value="Burundi">Burundi</option>
+  <option value="Belgium">Belgium</option>
+  <option value="Benin">Benin</option>
+  <option value="Burkina Faso">Burkina Faso</option>
+  <option value="Bangladesh">Bangladesh</option>
+  <option value="Bulgaria">Bulgaria</option>
+  <option value="The Bahamas">The Bahamas</option>
+  <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
+  <option value="Belarus">Belarus</option>
+  <option value="Belize">Belize</option>
+  <option value="Bermuda">Bermuda</option>
+  <option value="Bolivia">Bolivia</option>
+  <option value="Brazil">Brazil</option>
+  <option value="Brunei">Brunei</option>
+  <option value="Bhutan">Bhutan</option>
+  <option value="Botswana">Botswana</option>
+  <option value="Central African Republic">Central African Republic</option>
+  <option value="Canada">Canada</option>
+  <option value="Switzerland">Switzerland</option>
+  <option value="Chile">Chile</option>
+  <option value="China">China</option>
+  <option value="Ivory Coast">Ivory Coast</option>
+  <option value="Cameroon">Cameroon</option>
+  <option value="Democratic Republic of the Congo">Democratic Republic of the Congo</option>
+  <option value="Republic of the Congo">Republic of the Congo</option>
+  <option value="Colombia">Colombia</option>
+  <option value="Costa Rica">Costa Rica</option>
+  <option value="Cuba">Cuba</option>
+  <option value="Cyprus">Cyprus</option>
+  <option value="Czech Republic">Czech Republic</option>
+  <option value="Germany">Germany</option>
+  <option value="Djibouti">Djibouti</option>
+  <option value="Denmark">Denmark</option>
+  <option value="Dominican Republic">Dominican Republic</option>
+  <option value="Algeria">Algeria</option>
+  <option value="Ecuador">Ecuador</option>
+  <option value="Egypt">Egypt</option>
+  <option value="Eritrea">Eritrea</option>
+  <option value="Spain">Spain</option>
+  <option value="Estonia">Estonia</option>
+  <option value="Ethiopia">Ethiopia</option>
+  <option value="Finland">Finland</option>
+  <option value="Fiji">Fiji</option>
+  <option value="Falkland Islands">Falkland Islands</option>
+  <option value="France">France</option>
+  <option value="Gabon">Gabon</option>
+  <option value="United Kingdom">United Kingdom</option>
+  <option value="Georgia">Georgia</option>
+  <option value="Ghana">Ghana</option>
+  <option value="Guinea">Guinea</option>
+  <option value="Gambia">Gambia</option>
+  <option value="Guinea Bissau">Guinea Bissau</option>
+  <option value="Equatorial Guinea">Equatorial Guinea</option>
+  <option value="Greece">Greece</option>
+  <option value="Greenland">Greenland</option>
+  <option value="Guatemala">Guatemala</option>
+  <option value="French Guiana">French Guiana</option>
+  <option value="Guyana">Guyana</option>
+  <option value="Honduras">Honduras</option>
+  <option value="Croatia">Croatia</option>
+  <option value="Haiti">Haiti</option>
+  <option value="Hungary">Hungary</option>
+  <option value="Indonesia">Indonesia</option>
+  <option value="India">India</option>
+  <option value="Ireland">Ireland</option>
+  <option value="Iran">Iran</option>
+  <option value="Iraq">Iraq</option>
+  <option value="Iceland">Iceland</option>
+  <option value="Israel">Israel</option>
+  <option value="Italy">Italy</option>
+  <option value="Jamaica">Jamaica</option>
+  <option value="Jordan">Jordan</option>
+  <option value="Japan">Japan</option>
+  <option value="Kazakhstan">Kazakhstan</option>
+  <option value="Kenya">Kenya</option>
+  <option value="Kyrgyzstan">Kyrgyzstan</option>
+  <option value="Cambodia">Cambodia</option>
+  <option value="South Korea">South Korea</option>
+  <option value="Kuwait">Kuwait</option>
+  <option value="Laos">Laos</option>
+  <option value="Lebanon">Lebanon</option>
+  <option value="Liberia">Liberia</option>
+  <option value="Libya">Libya</option>
+  <option value="Sri Lanka">Sri Lanka</option>
+  <option value="Lesotho">Lesotho</option>
+  <option value="Lithuania">Lithuania</option>
+  <option value="Luxembourg">Luxembourg</option>
+  <option value="Latvia">Latvia</option>
+  <option value="Morocco">Morocco</option>
+  <option value="Moldova">Moldova</option>
+  <option value="Madagascar">Madagascar</option>
+  <option value="Mexico">Mexico</option>
+  <option value="Macedonia">Macedonia</option>
+  <option value="Mali">Mali</option>
+  <option value="Myanmar">Myanmar</option>
+  <option value="Montenegro">Montenegro</option>
+  <option value="Mongolia">Mongolia</option>
+  <option value="Mozambique">Mozambique</option>
+  <option value="Mauritania">Mauritania</option>
+  <option value="Malawi">Malawi</option>
+  <option value="Malaysia">Malaysia</option>
+  <option value="Namibia">Namibia</option>
+  <option value="New Caledonia">New Caledonia</option>
+  <option value="Niger">Niger</option>
+  <option value="Nigeria">Nigeria</option>
+  <option value="Nicaragua">Nicaragua</option>
+  <option value="Netherlands">Netherlands</option>
+  <option value="Norway">Norway</option>
+  <option value="Nepal">Nepal</option>
+  <option value="New Zealand">New Zealand</option>
+  <option value="Oman">Oman</option>
+  <option value="Pakistan">Pakistan</option>
+  <option value="Panama">Panama</option>
+  <option value="Peru">Peru</option>
+  <option value="Philippines">Philippines</option>
+  <option value="Papua New Guinea">Papua New Guinea</option>
+  <option value="Poland">Poland</option>
+  <option value="Puerto Rico">Puerto Rico</option>
+  <option value="North Korea">North Korea</option>
+  <option value="Portugal">Portugal</option>
+  <option value="Paraguay">Paraguay</option>
+  <option value="Qatar">Qatar</option>
+  <option value="Romania">Romania</option>
+  <option value="Russia">Russia</option>
+  <option value="Rwanda">Rwanda</option>
+  <option value="Western Sahara">Western Sahara</option>
+  <option value="Saudi Arabia">Saudi Arabia</option>
+  <option value="Sudan">Sudan</option>
+  <option value="South Sudan">South Sudan</option>
+  <option value="Senegal">Senegal</option>
+  <option value="Solomon Islands">Solomon Islands</option>
+  <option value="Sierra Leone">Sierra Leone</option>
+  <option value="El Salvador">El Salvador</option>
+  <option value="Somaliland">Somaliland</option>
+  <option value="Somalia">Somalia</option>
+  <option value="Republic of Serbia">Republic of Serbia</option>
+  <option value="Suriname">Suriname</option>
+  <option value="Slovakia">Slovakia</option>
+  <option value="Slovenia">Slovenia</option>
+  <option value="Sweden">Sweden</option>
+  <option value="Swaziland">Swaziland</option>
+  <option value="Syria">Syria</option>
+  <option value="Chad">Chad</option>
+  <option value="Togo">Togo</option>
+  <option value="Thailand">Thailand</option>
+  <option value="Tajikistan">Tajikistan</option>
+  <option value="Turkmenistan">Turkmenistan</option>
+  <option value="East Timor">East Timor</option>
+  <option value="Trinidad and Tobago">Trinidad and Tobago</option>
+  <option value="Tunisia">Tunisia</option>
+  <option value="Turkey">Turkey</option>
+  <option value="Taiwan">Taiwan</option>
+  <option value="United Republic of Tanzania">United Republic of Tanzania</option>
+  <option value="Uganda">Uganda</option>
+  <option value="Ukraine">Ukraine</option>
+  <option value="Uruguay">Uruguay</option>
+  <option value="United States of America">United States of America</option>
+  <option value="Uzbekistan">Uzbekistan</option>
+  <option value="Venezuela">Venezuela</option>
+  <option value="Vietnam">Vietnam</option>
+  <option value="Vanuatu">Vanuatu</option>
+  <option value="West Bank">West Bank</option>
+  <option value="Yemen">Yemen</option>
+  <option value="South Africa">South Africa</option>
+  <option value="Zambia">Zambia</option>
+  <option value="Zimbabwe">Zimbabwe</option>
+</select>
 
 <div id="svg"></div>
 <!-- load the d3.js library -->    	
@@ -72,101 +254,99 @@ var svg = d3.select("body").append("svg")
 
 // Get the data
 
-function populateData(){
-}
-d3.csv("COVID-19_in_bd.csv").then(function(data) {
 
-  // format the data
-  data.forEach(function(d) {
-      d.Date = parseTime(d.Date);
-      d.Confirmed = +d.Confirmed;
-      d.Deaths= +d.Deaths;
-      d.Recovered= +d.Recovered;
-  });
+var populateData = function(country){
+  d3.csv("world_data.csv").then(function(data) {
 
-  // Scale the range of the data
-  x.domain(d3.extent(data, function(d) { return d.Date; }));
-  y.domain([0, d3.max(data, function(d) { 
-    return Math.max(d.Confirmed, d.Recovered, d.Deaths)})]);
+    data = data.filter(function(d) {
+      return d["Country"] ===  country;
+    })
 
-  colors = {
-    "Confirmed": "#000000",
-    "Deaths": "#FC0303",
-    "Recovered": "#00FF00"
-  }
+    data.forEach(function(d) {
+        d.Date = parseTime(d.Date);
+        d.Confirmed = +d.Confirmed;
+        d.Deaths= +d.Deaths;
+        d.Recovered= +d.Recovered;
+    });
 
-  /*
-   *var colorArray = Object.keys(colors).map(function(key) {
-   *  return [{
-   *    "name": key,
-   *    "value": colors[key]
-   *  }];
-   *});
-   */
+
+
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.Date; }));
+    y.domain([0, d3.max(data, function(d) { 
+      return Math.max(d.Confirmed, d.Recovered, d.Deaths)})]);
+
+    colors = {
+      "Confirmed": "#000000",
+      "Deaths": "#FC0303",
+      "Recovered": "#00FF00"
+    }
+
    legendScale = d3.scaleOrdinal()
        .domain(Object.keys(colors))
        .range(Object.values(colors));
 
+    svg.selectAll("*").remove();
 
-  // Add the valueline path.
-  svg.append("path")
-      .data([data])
-      .attr("class", "line")
-      .style("stroke", colors["Confirmed"])
-      .attr("d", valueline_confirmed);
+    // Add the valueline path.
+    svg.append("path")
+        .data([data])
+        .attr("class", "line")
+        .style("stroke", colors["Confirmed"])
+        .attr("d", valueline_confirmed);
 
-  svg.append("path")
-      .data([data])
-      .attr("class", "line")
-      .style("stroke", colors["Deaths"])
-      .attr("d", valueline_deaths);
+    svg.append("path")
+        .data([data])
+        .attr("class", "line")
+        .style("stroke", colors["Deaths"])
+        .attr("d", valueline_deaths);
 
-  svg.append("path")
-      .data([data])
-      .attr("class", "line")
-      .style("stroke", "green")
-      .style("stroke", colors["Recovered"])
-      .attr("d", valueline_recovered);
+    svg.append("path")
+        .data([data])
+        .attr("class", "line")
+        .style("stroke", colors["Recovered"])
+        .attr("d", valueline_recovered);
 
-  // Add the x Axis
-  svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+    // Add the x Axis
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
 
-  // Add the y Axis
-  svg.append("g")
-      .call(d3.axisLeft(y));
-  svg.append('text')                                     
-        .attr('x', 10)              
-        .attr('y', -5)             
-        .text('Data taken from https://github.com/datasticslab'); 
+    // Add the y Axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+    svg.append('text')                                     
+          .attr('x', 10)              
+          .attr('y', -5)             
+          .text('Data taken from https://github.com/datasticslab'); 
 
-  var group = d3.select("svg").append("g")
-      .attr("class","legend-group");
+    var group = d3.select("svg").append("g")
+        .attr("class","legend-group");
 
-  var legend = group.selectAll(".legend")
-      .data(legendScale.domain().slice())
-    .enter().append("g")
-      .attr("class","legend")
-      .attr("transform",function(d,i) {
-        return "translate(0," + i * 20 + ")";
-      });
+    var legend = group.selectAll(".legend")
+        .data(legendScale.domain().slice())
+      .enter().append("g")
+        .attr("class","legend")
+        .attr("transform",function(d,i) {
+          return "translate(0," + i * 20 + ")";
+        });
 
-  legend.append("rect")
-      .attr("x",475)
-      .attr("y",65)
-      .attr("width",18)
-      .attr("height",18)
-      .style("fill", legendScale);
+    legend.append("rect")
+        .attr("x",475)
+        .attr("y",65)
+        .attr("width",18)
+        .attr("height",18)
+        .style("fill", legendScale);
 
-  legend.append("text")
-      .attr("x",465)
-      .attr("y",73)
-      .attr("dy",".35em")
-      .style("text-anchor","end")
-      .text(function(d) { return d; });
+    legend.append("text")
+        .attr("x",465)
+        .attr("y",73)
+        .attr("dy",".35em")
+        .style("text-anchor","end")
+        .text(function(d) { return d; });
 
-});
+  })
+};
 
 
 </script>

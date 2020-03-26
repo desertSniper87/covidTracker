@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+body {
+  font-family: sans-serif;
+  color: #444;
+}
+
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.axis text {
+  font-size: 10px;
+}
+
+</style>
+<body>
+
+<h4>Cases in Bangladesh</h4>
+
+<div id="svg"></div>
+<!-- load the d3.js library -->    	
+<!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
+<script src="https://d3js.org/d3.v5.js"></script>
+<script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 20, bottom: 50, left: 70},
+    width = 500 - margin.left - margin.right,
+    height = 360 - margin.top - margin.bottom;
+
+// parse the date / time
+var parseTime = d3.timeParse("%Y-%m-%d");
+
+
+// set the ranges
+var x = d3.scaleTime().range([0, width]);
+var y = d3.scaleLinear().range([height, 0]);
+
+// define the line
+var valueline_confirmed = d3.line()
+    .x(function(d) { return x(d.Date); })
+    .y(function(d) { return y(d.Confirmed); });
+
+var valueline_deaths = d3.line()
+    .x(function(d) { return x(d.Date); })
+    .y(function(d) { return y(d.Deaths); });
+
+var valueline_recovered = d3.line()
+    .x(function(d) { return x(d.Date); })
+    .y(function(d) { return y(d.Recovered); });
+
+// append the svg obgect to the body of the page
+// appends a 'group' element to 'svg'
+// moves the 'group' element to the top left margin
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+// Get the data
+
+function populateData(){
+}
+d3.csv("COVID-19_in_bd.csv").then(function(data) {
+
+  // format the data
+  data.forEach(function(d) {
+      d.Date = parseTime(d.Date);
+      d.Confirmed = +d.Confirmed;
+      d.Deaths= +d.Deaths;
+      d.Recovered= +d.Recovered;
+  });
+
+  // Scale the range of the data
+  x.domain(d3.extent(data, function(d) { return d.Date; }));
+  y.domain([0, d3.max(data, function(d) { 
+    return Math.max(d.Confirmed, d.Recovered, d.Deaths)})]);
+
+  colors = {
+    "Confirmed": "#000000",
+    "Deaths": "#FC0303",
+    "Recovered": "#00FF00"
+  }
+
+  /*
+   *var colorArray = Object.keys(colors).map(function(key) {
+   *  return [{
+   *    "name": key,
+   *    "value": colors[key]
+   *  }];
+   *});
+   */
+   legendScale = d3.scaleOrdinal()
+       .domain(Object.keys(colors))
+       .range(Object.values(colors));
+
+
+  // Add the valueline path.
+  svg.append("path")
+      .data([data])
+      .attr("class", "line")
+      .style("stroke", colors["Confirmed"])
+      .attr("d", valueline_confirmed);
+
+  svg.append("path")
+      .data([data])
+      .attr("class", "line")
+      .style("stroke", colors["Deaths"])
+      .attr("d", valueline_deaths);
+
+  svg.append("path")
+      .data([data])
+      .attr("class", "line")
+      .style("stroke", "green")
+      .style("stroke", colors["Recovered"])
+      .attr("d", valueline_recovered);
+
+  // Add the x Axis
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  // Add the y Axis
+  svg.append("g")
+      .call(d3.axisLeft(y));
+  svg.append('text')                                     
+        .attr('x', 10)              
+        .attr('y', -5)             
+        .text('Data taken from https://github.com/datasticslab'); 
+
+  var group = d3.select("svg").append("g")
+      .attr("class","legend-group");
+
+  var legend = group.selectAll(".legend")
+      .data(legendScale.domain().slice())
+    .enter().append("g")
+      .attr("class","legend")
+      .attr("transform",function(d,i) {
+        return "translate(0," + i * 20 + ")";
+      });
+
+  legend.append("rect")
+      .attr("x",475)
+      .attr("y",65)
+      .attr("width",18)
+      .attr("height",18)
+      .style("fill", legendScale);
+
+  legend.append("text")
+      .attr("x",465)
+      .attr("y",73)
+      .attr("dy",".35em")
+      .style("text-anchor","end")
+      .text(function(d) { return d; });
+
+});
+
+
+</script>
+</body>
