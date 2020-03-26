@@ -23,6 +23,19 @@ body {
   font-size: 10px;
 }
 
+div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 60px;					
+    height: 28px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
+
 </style>
 <body>
 
@@ -223,6 +236,7 @@ var margin = {top: 20, right: 20, bottom: 50, left: 70},
 
 // parse the date / time
 var parseTime = d3.timeParse("%Y-%m-%d");
+var formatDateToString = d3.timeFormat("%b %Y")
 
 
 // set the ranges
@@ -242,13 +256,15 @@ var valueline_recovered = d3.line()
     .x(function(d) { return x(d.Date); })
     .y(function(d) { return y(d.Recovered); });
 
-// append the svg obgect to the body of the page
-// appends a 'group' element to 'svg'
-// moves the 'group' element to the top left margin
+// Define the div for the tooltip
+var div = d3.select("body").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
-  .append("g")
+    .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
@@ -319,6 +335,27 @@ var populateData = function(country){
           .attr('x', 10)              
           .attr('y', -5)             
           .text('Data taken from https://github.com/datasticslab'); 
+
+    // Add the scatterplot
+    svg.selectAll("dot")	
+        .data(data)			
+    .enter().append("circle")								
+        .attr("r", 5)		
+        .attr("cx", function(d) { return x(d.Date); })		 
+        .attr("cy", function(d) { return y(d.Confirmed); })		
+        .on("mouseover", function(d) {		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div	.html(formatDateToString (d.Date) + "<br/>"  + d.Confirmed)	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px");	
+            })					
+        .on("mouseout", function(d) {		
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+        });
 
     var group = d3.select("svg").append("g")
         .attr("class","legend-group");
