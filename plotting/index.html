@@ -339,8 +339,9 @@ var populateLineChart = function(data, svg){
 
 d3.select('#dailyDropdown').on("change", function () {
       country = d3.select('#country').node().value;
-      d3.json("https://corona.lmao.ninja/countries").then(function(data) {
-        data = filterDataByCountry(data, country);
+      d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + country).then(function(data) {
+    //console.log(data[0].timeseries)
+      data = cleanData(data[0].timeseries);
         v = d3.select('#dailyDropdown').node().value;
         populateBarGraph(data, svgBarGraph, v);
       })
