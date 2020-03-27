@@ -247,11 +247,8 @@ const formatDateToString = d3.timeFormat("%b %d")
 
 const colors = {
   "Confirmed": "#000000",
-  "NewConfirmed": "#000000",
   "Deaths": "#FC0303",
-  "NewDeaths": "#FC0303",
   "Recovered": "#00FF00",
-  "NewRecovered": "#00FF00"
 }
 
 var svgLineChart = d3.select("#svgLineChart")
@@ -505,7 +502,7 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
 
 
 
-    .attr("fill", colors[dailyValue]);
+    .attr("fill", colors[dailyValue.slice(3)]);
 
   let barX = d3.scaleTime().range([0, width]);
   barX .domain(d3.extent(data, function(d) { return d.Date; }));
