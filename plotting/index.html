@@ -224,7 +224,13 @@ div.tooltip {
 </select>
 
 <svg id="svgLineChart"></svg>
-<svg id="svgBarGraph"></svg>
+  <select id="dailyDropdown">
+      <option value="NewConfirmed" selected="selected">New Confirmed Cases Per Day</option>
+      <option value="NewDeaths">New Deaths Per Day</option>
+      <option value="NewRecovered">Recovered Patients Per Day</option>
+  </select>
+<svg id="svgBarGraph">
+</svg>
 <!-- load the d3.js library -->    	
 <!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
 <script src="https://d3js.org/d3.v5.js"></script>
@@ -264,44 +270,47 @@ var legendScale = d3.scaleOrdinal()
   .range(Object.values(colors));
 
 
+var filterDataByCountry = function(data, country){
+  data = data.filter(function(d) {
+    return d["Country"] ===  country;
+  })
+
+  var prevConfirmed, prevDeaths, prevRecovered = 0;
+
+  data.forEach(function(d) {
+    d.Date = parseTime(d.Date);
+    d.Confirmed = +d.Confirmed;
+    d.Deaths= +d.Deaths;
+    d.Recovered= +d.Recovered;
+
+    d.NewConfirmed = d.Confirmed - prevConfirmed;
+    prevConfirmed = +d.Confirmed;
+
+    d.NewDeaths = d.Deaths - prevDeaths;
+    prevDeaths = +d.Deaths;
+      
+    d.NewRecovered = d.Recovered - prevRecovered;
+    prevRecovered = +d.Recovered;
+  });
+
+
+  var daysWithoutIncident = data.filter(function (el) {
+    return el.Confirmed == 0 &&
+           el.Deaths == 0 &&
+           el.Recovered == 0;
+  });
+
+  data.splice(0, daysWithoutIncident.length-1);
+  return data;
+}
+
 var populateData = function(country){
   d3.csv("world_data.csv").then(function(data) {
 
-    data = data.filter(function(d) {
-      return d["Country"] ===  country;
-    })
-
-    var prevConfirmed, prevDeaths, prevRecovered = 0;
-
-    data.forEach(function(d) {
-      d.Date = parseTime(d.Date);
-      d.Confirmed = +d.Confirmed;
-      d.Deaths= +d.Deaths;
-      d.Recovered= +d.Recovered;
-
-      d.NewConfirmed = d.Confirmed - prevConfirmed;
-      prevConfirmed = +d.Confirmed;
-
-      d.NewDeaths = d.Deaths - prevDeaths;
-      prevDeaths = +d.Deaths;
-        
-      d.NewRecovered = d.Recovered - prevRecovered;
-      prevRecovered = +d.Recovered;
-    });
-
-    console.log(data);
-
-    var daysWithoutIncident = data.filter(function (el) {
-      return el.Confirmed == 0 &&
-             el.Deaths == 0 &&
-             el.Recovered == 0;
-    });
-
-    data.splice(0, daysWithoutIncident.length-1);
+    data = filterDataByCountry(data, country);
 
     populateLineChart(data, svgLineChart);
     populateBarGraph(data, svgBarGraph);
-
 
     d3.select('.legend-group').remove();
     let group = d3.select("svg").append("g").attr("class","legend-group");
@@ -455,7 +464,15 @@ var populateLineChart = function(data, svg){
 
 }
 
-var populateBarGraph = function(data, svg){
+d3.select('#dailyDropdown').on("change", function () {
+      country = d3.select('#country').node().value;
+      d3.csv("world_data.csv").then(function(data) {
+        data = filterDataByCountry(data, country);
+        v = d3.select('#dailyDropdown').node().value;
+        populateBarGraph(data, svgBarGraph, v);
+})});
+
+var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
   svg.selectAll("*").remove();
 
   let x = d3.scaleBand()
@@ -464,18 +481,18 @@ var populateBarGraph = function(data, svg){
   let y = d3.scaleLinear()
     .range([height, 0]);
 
-  x.domain(data.map(function(d) { return d.Date; }));
-  y.domain([0, d3.max(data, function(d) { return d.NewConfirmed; })]);
 
-  // append the rectangles for the bar chart
+  x.domain(data.map(function(d) { return d.Date; }));
+  y.domain([0, d3.max(data, function(d) {  return d[dailyValue]; })]);
+
   svg.selectAll(".bar")
     .data(data)
     .enter().append("rect")
     .attr("class", "bar")
     .attr("x", function(d) { return x(d.Date); })
     .attr("width", x.bandwidth())
-    .attr("y", function(d) { return y(d.NewConfirmed); })
-    .attr("height", function(d) { return height - y(d.NewConfirmed); });
+    .attr("y", function(d) { return y(d[dailyValue]); })
+    .attr("height", function(d) { return Math.max(height - y(d[dailyValue]), 0); });
 
   let barX = d3.scaleTime().range([0, width]);
   barX .domain(d3.extent(data, function(d) { return d.Date; }));
@@ -484,8 +501,9 @@ var populateBarGraph = function(data, svg){
     .attr("class", "axis")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(barX)
-                          .ticks(8)
+                          .ticks(5)
                           .tickFormat(formatDateToString));
+
 
   // add the y Axis
   svg.append("g")
