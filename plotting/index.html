@@ -26,14 +26,15 @@ body {
 div.tooltip {	
     position: absolute;			
     text-align: center;			
-    width: 80px;					
-    height: 28px;					
+    //width: 80px;					
+    //height: 38px;					
     padding: 2px;				
     font: 12px sans-serif;		
     background: lightsteelblue;	
     border: 0px;		
     border-radius: 8px;			
     pointer-events: none;			
+    display: inline-block;
 }
 
 </style>
@@ -65,8 +66,8 @@ const parseTime = d3.timeParse("%m/%d/%y");
 const formatDateToString = d3.timeFormat("%b %d")
 
 const colors = {
-  "Confirmed": "#000000",
-  "Deaths": "#FC0303",
+  "Confirmed": "#FF0000",
+  "Deaths": "#000000",
   "Recovered": "#00FF00",
 }
 
@@ -158,10 +159,12 @@ d3.json("https://covid19.mathdro.id/api/countries").then(function(data) {
 });
 
 var populateData = function(country){
-  //d3.csv("world_data.csv").then(function(data) {
   d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + country).then(function(data) {
-    //console.log(data[0].timeseries)
-    data = cleanData(data[0].timeseries);
+    try {
+      data = cleanData(data[0].timeseries);
+    } catch (e) {
+      alert("No data available for iso3 code " + country);
+    }
     populateLineChart(data, svgLineChart);
     populateBarGraph(data, svgBarGraph);
 
@@ -248,7 +251,7 @@ var populateLineChart = function(data, svg){
   svg.append('text')                                     
     .attr('x', 10)              
     .attr('y', -5)             
-    .text('Data taken from https://github.com/datasticslab'); 
+    .text('Data taken from Johns Hopkins CSSE'); 
 
   d3.select(".line_c")
         .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength() ) 
@@ -274,11 +277,16 @@ var populateLineChart = function(data, svg){
   svg.selectAll("dot")	
     .data(data)			
     .enter().append("circle")								
-    .attr("r", 5)		
+    .attr("r", 7)		
     .attr("cx", function(d) { return x(d.date); })		 
     .attr("cy", function(d) { return y(d.confirmed); })		
     .style("fill", colors["Confirmed"])
+    .style("opacity", 0)
     .on("mouseover", function(d) {		
+      d3.select(this)
+        .transition()		
+        .duration(200)
+        .style("opacity", .9);		
       div.transition()		
         .duration(200)		
         .style("opacity", .9);		
@@ -287,6 +295,10 @@ var populateLineChart = function(data, svg){
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
     .on("mouseout", function(d) {		
+      d3.select(this)
+        .transition()
+        .duration(500)		
+        .style("opacity", 0);		
       div.transition()		
         .duration(500)		
         .style("opacity", 0);	
@@ -299,7 +311,12 @@ var populateLineChart = function(data, svg){
     .attr("cx", function(d) { return x(d.date); })		 
     .attr("cy", function(d) { return y(d.deaths); })		
     .style("fill", colors["Deaths"])
+    .style("opacity", 0)
     .on("mouseover", function(d) {		
+      d3.select(this)
+        .transition()		
+        .duration(200)
+        .style("opacity", .9);		
       div.transition()		
         .duration(200)		
         .style("opacity", .9);		
@@ -308,6 +325,10 @@ var populateLineChart = function(data, svg){
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
     .on("mouseout", function(d) {		
+      d3.select(this)
+        .transition()
+        .duration(500)		
+        .style("opacity", 0);		
       div.transition()		
         .duration(500)		
         .style("opacity", 0);	
@@ -321,7 +342,12 @@ var populateLineChart = function(data, svg){
     .attr("cx", function(d) { return x(d.date); })		 
     .attr("cy", function(d) { return y(d.recovered); })		
     .style("fill", colors["Recovered"])
+    .style("opacity", 0)
     .on("mouseover", function(d) {		
+      d3.select(this)
+        .transition()		
+        .duration(200)
+        .style("opacity", .9);		
       div.transition()		
         .duration(200)		
         .style("opacity", .9);		
@@ -330,6 +356,10 @@ var populateLineChart = function(data, svg){
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
     .on("mouseout", function(d) {		
+      d3.select(this)
+        .transition()
+        .duration(500)		
+        .style("opacity", 0);		
       div.transition()		
         .duration(500)		
         .style("opacity", 0);	
@@ -340,7 +370,6 @@ var populateLineChart = function(data, svg){
 d3.select('#dailyDropdown').on("change", function () {
       country = d3.select('#country').node().value;
       d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + country).then(function(data) {
-    //console.log(data[0].timeseries)
       data = cleanData(data[0].timeseries);
         v = d3.select('#dailyDropdown').node().value;
         populateBarGraph(data, svgBarGraph, v);
@@ -359,6 +388,10 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
   let y = d3.scaleLinear()
     .range([height, 0]);
 
+  let div = d3.select("body").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+
 
   x.domain(data.map(function(d) { return d.date; }));
   y.domain([0, d3.max(data, function(d) {  return d[dailyValue]; })]);
@@ -371,12 +404,38 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
     .attr("width", x.bandwidth())
     .attr("y", function(d) { return y(d[dailyValue]); })
     .attr("height", 0)
+    .on("mouseover", function(d) {		
+      d3.select(this)
+        .transition()
+        .duration(500)		
+        .style("fill", "blue");		
+      div.transition()		
+        .duration(200)		
+        .style("opacity", .9);		
+      div.html(formatDateToString (d.date) +
+        "<br/>"  +
+        d[dailyValue] +
+        " new " +
+        dailyValue.slice(3).toLowerCase())
+      .style("left", (d3.event.pageX) + "px")		
+      .style("top", (d3.event.pageY - 28) + "px");	
+    })					
+    .on("mouseout", function(d) {		
+      d3.select(this)
+        .transition()
+        .duration(500)		
+        .style("fill", colors[dailyValue.slice(3)]);		
+      div.transition()		
+        .duration(500)		
+        .style("opacity", 0);	
+    })
     .transition()
     .duration(250)
     .delay(function (d, i) {
       return i * 25;
     })
-    .attr("height", function(d) { return Math.max(height - y(d[dailyValue]), 0); })
+    .attr("height", function(d) { 
+      return height - y(d[dailyValue]); })
     .attr("fill", colors[dailyValue.slice(3)]);
 
   let barX = d3.scaleTime().range([0, width]);
