@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: auto;
+  position: relative;
+  width: 960px;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  //display: none;
+}
+
+.line {
+  fill: none;
+  stroke: blue;
+  stroke-width: 1.8px;
+}
+.grid .tick {
+    stroke: lightgrey;
+    opacity: 0.7;
+}
+.grid path {
+      stroke-width: 0;
+}
+form {
+  position: absolute;
+  right: 450px;
+  top: 10px;
+}
+
+</style>
+<form align='center'>
+<select id="countries" name="countries" align='center'>
+<option value="AFRICA">Africa</option>
+<option value="AMERICAS">Americas</option>
+<option value="ASIA">Asia</option>
+<option value="EUROPE">Europe</option>
+<option value="OCEANIA">Oceania</option>
+
+</select>
+</form>
+
+<p id='tre'></p>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script>
+
+var margin = {top: 20, right: 80, bottom: 20, left: 50},
+    width = 960 - margin.left - margin.right,
+    height = 350 - margin.top - margin.bottom;
+
+var region = "AFRICA";
+var parseDate = d3.time.format("%Y").parse;
+
+var x = d3.time.scale()
+    .range([0, width]);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+    
+var c = d3.scale.ordinal()
+    .domain(["AFRICA", "AMERICAS", "EUROPE","ASIA","OCEANIA"])
+    .range(["blue","black","orange","green","#9900FF"]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    .ticks(10);
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .ticks(15);
+
+var first, last;
+  
+        
+var line = d3.svg.line()
+    .interpolate("linear")
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d[region]); });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("data.csv", function(error, data) {
+    if (error) throw error;
+    //color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
+    data.forEach(function(d) {
+    d.date = parseDate(d.date);
+    
+    d["AFRICA"] = +d["AFRICA"];
+    d["AMERICAS"] = +d["AMERICAS"];
+    d["ASIA"] = +d["ASIA"];
+    d["EUROPE"] = +d["EUROPE"];
+    d["OCEANIA"] = +d["OCEANIA"];
+  });
+
+  
+
+  x.domain([data[0].date, data[data.length - 1].date]);
+  y.domain(d3.extent(data, function(d) { return d[region]; }));
+
+  first=data[0]["AFRICA"];
+  last=data[data.length - 1]["AFRICA"];
+  
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Index");
+
+   svg.append("g")         
+        .attr("class", "grid")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis
+        .tickSize(-height, 0, 0)
+        .tickFormat("")); 
+        
+  svg.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", line);
+
+  svg.append("text")
+      .datum(data[data.length - 1])
+      .attr("class", "label")
+      .attr("transform", transform)
+      .attr("x", 3)
+      .attr("dy", ".35em")
+      .text(region);
+      
+  
+    d3.select("#tre")
+     .text(region+" 1961-2014: "+ d3.round(100*(last-first)/first,2)+"%");
+ 
+
+  d3.selectAll("#countries").on("change", change);
+
+  var timeout=setTimeout(2000);
+
+  function change() {
+    clearTimeout(timeout);
+
+    region  = this.value;
+    first=data[0][region];
+    last=data[data.length - 1][region];
+    d3.select("#tre")
+    .text(region+" 1961-2014: "+ d3.round(100*(last-first)/first,2)+"%");
+
+    // First transition the line & label to the new value.
+    var trans1 = svg.transition().duration(750);
+    
+    trans1.selectAll(".line")
+       .attr("d", line)
+       //.style("stroke", function(d) { return c(d[region]); });
+       .style("stroke",c(region));
+    trans1.selectAll(".label").attr("transform", transform).text(region);
+
+    // Then transition the y-axis.
+    y.domain(d3.extent(data, function(d) { return d[region]; }));
+    var trans2 = trans1.transition();
+    trans2.selectAll(".line").attr("d", line);
+    trans2.selectAll(".label").attr("transform", transform);
+    trans2.selectAll(".y.axis").call(yAxis);
+  }
+
+  function transform(d) {
+    return "translate(" + x(d.date) + "," + y(d[region]) + ")";
+  }
+});
+
+</script>

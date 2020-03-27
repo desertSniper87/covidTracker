@@ -9,7 +9,7 @@ body {
 
 .line {
     fill: none;
-    stroke: #ffab00;
+    //stroke: #ffab00;
     stroke-width: 3;
 }
 
@@ -251,6 +251,10 @@ const colors = {
   "Recovered": "#00FF00",
 }
 
+var t = d3.transition()
+  .duration(5000)
+  .ease(d3.easeLinear); 
+
 var svgLineChart = d3.select("#svgLineChart")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -367,22 +371,19 @@ var populateLineChart = function(data, svg){
     return Math.max(d.Confirmed, d.Recovered, d.Deaths)})]);
 
   // Add the valueline path.
-  svg.append("path")
+  path_c = svg.append("path")
     .data([data])
-    .attr("class", "line")
-    .style("stroke", colors["Confirmed"])
-    .attr("d", valueline_confirmed);
+    .attr("class", "line line_c")
+    .attr("d", valueline_confirmed)
 
-  svg.append("path")
+  path_d = svg.append("path")
     .data([data])
-    .attr("class", "line")
-    .style("stroke", colors["Deaths"])
+    .attr("class", "line line_d")
     .attr("d", valueline_deaths);
 
-  svg.append("path")
+  path_r = svg.append("path")
     .data([data])
-    .attr("class", "line")
-    .style("stroke", colors["Recovered"])
+    .attr("class", "line line_r")
     .attr("d", valueline_recovered);
 
   // Add the x Axis
@@ -397,6 +398,27 @@ var populateLineChart = function(data, svg){
     .attr('x', 10)              
     .attr('y', -5)             
     .text('Data taken from https://github.com/datasticslab'); 
+
+  d3.select(".line_c")
+        .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength() ) 
+        .attr("stroke-dashoffset", path_c.node().getTotalLength())
+        .transition(t)
+        .attr("stroke-dashoffset", 0)
+        .style("stroke", colors["Confirmed"]);
+
+  d3.select(".line_d")
+        .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength() ) 
+        .attr("stroke-dashoffset", path_d.node().getTotalLength())
+        .transition(t)
+        .attr("stroke-dashoffset", 0)
+        .style("stroke", colors["Deaths"]);
+
+  d3.select(".line_r")
+        .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength() ) 
+        .attr("stroke-dashoffset", path_r.node().getTotalLength())
+        .transition(t)
+        .attr("stroke-dashoffset", 0)
+        .style("stroke", colors["Recovered"]);
 
   svg.selectAll("dot")	
     .data(data)			
