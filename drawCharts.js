@@ -12,6 +12,9 @@ const colors = {
   "Deaths": "#000000",
   "Recovered": "#00FF00",
 }
+var tooltipDiv = d3.select("body").append("div")	
+  .attr("class", "tooltip")				
+  .style("opacity", 0);
 
 var t = d3.transition()
   .duration(750)
@@ -47,6 +50,8 @@ var filterDataByCountry = function(data, country){
 
   return data;
 }
+
+
 
 var cleanData = function(data){
   let prevConfirmed, prevDeaths, prevRecovered = 0;
@@ -200,10 +205,6 @@ var populateLineChart = function(data, svg){
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.recovered); });
 
-  // Define the div for the tooltip
-  let div = d3.select("body").append("div")	
-    .attr("class", "tooltip")				
-    .style("opacity", 0);
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
   y.domain([0, d3.max(data, function(d) { 
@@ -272,10 +273,10 @@ var populateLineChart = function(data, svg){
         .transition()		
         .duration(200)
         .style("opacity", .9);		
-      div.transition()		
+      tooltipDiv.transition()		
         .duration(200)		
         .style("opacity", .9);		
-      div	.html(formatDateToString (d.date) + "<br/>"  + d.confirmed + " Confirmed")	
+      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.confirmed + " Confirmed")	
         .style("left", (d3.event.pageX) + "px")		
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
@@ -284,7 +285,7 @@ var populateLineChart = function(data, svg){
         .transition()
         .duration(500)		
         .style("opacity", 0);		
-      div.transition()		
+      tooltipDiv.transition()		
         .duration(500)		
         .style("opacity", 0);	
     });
@@ -302,10 +303,10 @@ var populateLineChart = function(data, svg){
         .transition()		
         .duration(200)
         .style("opacity", .9);		
-      div.transition()		
+      tooltipDiv.transition()		
         .duration(200)		
         .style("opacity", .9);		
-      div	.html(formatDateToString (d.date) + "<br/>"  + d.deaths + " Deaths")	
+      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.deaths + " Deaths")	
         .style("left", (d3.event.pageX) + "px")		
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
@@ -314,7 +315,7 @@ var populateLineChart = function(data, svg){
         .transition()
         .duration(500)		
         .style("opacity", 0);		
-      div.transition()		
+      tooltipDiv.transition()		
         .duration(500)		
         .style("opacity", 0);	
     });
@@ -333,10 +334,10 @@ var populateLineChart = function(data, svg){
         .transition()		
         .duration(200)
         .style("opacity", .9);		
-      div.transition()		
+      tooltipDiv.transition()		
         .duration(200)		
         .style("opacity", .9);		
-      div	.html(formatDateToString (d.date) + "<br/>"  + d.recovered + " Recovered")	
+      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.recovered + " Recovered")	
         .style("left", (d3.event.pageX) + "px")		
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
@@ -345,7 +346,7 @@ var populateLineChart = function(data, svg){
         .transition()
         .duration(500)		
         .style("opacity", 0);		
-      div.transition()		
+      tooltipDiv.transition()		
         .duration(500)		
         .style("opacity", 0);	
     });
@@ -373,11 +374,6 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
   let y = d3.scaleLinear()
     .range([height, 0]);
 
-  let div = d3.select("body").append("div")	
-    .attr("class", "tooltip")				
-    .style("opacity", 0);
-
-
   x.domain(data.map(function(d) { return d.date; }));
   y.domain([0, d3.max(data, function(d) {  return d[dailyValue]; })]);
 
@@ -394,10 +390,10 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
         .transition()
         .duration(500)		
         .style("fill", "blue");		
-      div.transition()		
+      tooltipDiv.transition()		
         .duration(200)		
         .style("opacity", .9);		
-      div.html(formatDateToString (d.date) +
+      tooltipDiv.html(formatDateToString (d.date) +
         "<br/>"  +
         d[dailyValue] +
         " new " +
@@ -410,7 +406,7 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
         .transition()
         .duration(500)		
         .style("fill", colors[dailyValue.slice(3)]);		
-      div.transition()		
+      tooltipDiv.transition()		
         .duration(500)		
         .style("opacity", 0);	
     })
@@ -447,14 +443,23 @@ var populatePieChart = function(data, svgDiv){
   let legendRectSize = 18;                                  
   let legendSpacing = 4;                                    
 
+  let colors = ({
+    "Active Cases": "#FFA500",
+    "Deaths": "#000000",
+    "Recovered": "#00FF00",
+  })
+
   let color = d3.scaleOrdinal()
     .domain(Object.keys(colors))
     .range(Object.values(colors));
 
   let newData = []
-  newData.push({label: 'Confirmed', value: data.confirmed});
+  //newData.push({label: 'Confirmed', value: data.confirmed});
+  newData.push({label: 'Active Cases', value: data.confirmed - data.deaths - data.recovered});
   newData.push({label: 'Deaths', value: data.deaths});
   newData.push({label: 'Recovered', value: data.recovered});
+
+  let confirmed = data.confirmed;
 
   data = newData
 
@@ -491,6 +496,24 @@ var populatePieChart = function(data, svgDiv){
         return arc(d)
       }
     }); 
+  let path = svg.selectAll('path');
+
+  path.on('mousemove', function(d) {
+    let percent = Math.round(1000 * d.data.value / confirmed) / 10;
+    console.log("data: ", data);
+    console.log("d: ", d);
+
+    tooltipDiv.transition()		
+      .duration(200)		
+      .style("opacity", .9);		
+    tooltipDiv.html(d.data.value + " " + d.data.label + "<br/>" +  percent + '%')	
+      .style("left", (d3.event.pageX) + "px")		
+      .style("top", (d3.event.pageY - 28) + "px");	
+  }).on("mouseout", function(d) {		
+    tooltipDiv.transition()		
+      .duration(500)		
+      .style("opacity", 0);	
+  });
 
 
   let legend = svg.selectAll('.legend')                     
@@ -541,10 +564,6 @@ var compareCountries = function(){
       .x(function(d) { return x(d.daysPassed); })
       .y(function(d) { return y(d[measure]); });
 
-    // Define the div for the tooltip
-    let div = d3.select("body").append("div")	
-      .attr("class", "tooltip")				
-      .style("opacity", 0);
 
     const color10C = d3.scaleOrdinal(d3.schemeCategory10)
 
@@ -613,10 +632,10 @@ var compareCountries = function(){
           .transition()		
           .duration(200)
           .style("opacity", .9);		
-        div.transition()		
+        tooltipDiv.transition()		
           .duration(200)		
           .style("opacity", .9);		
-        div.html(country1iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+        tooltipDiv.html(country1iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
           .style("left", (d3.event.pageX) + "px")		
           .style("top", (d3.event.pageY - 28) + "px");	
       })					
@@ -625,7 +644,7 @@ var compareCountries = function(){
           .transition()
           .duration(500)		
           .style("opacity", 0);		
-        div.transition()		
+        tooltipDiv.transition()		
           .duration(500)		
           .style("opacity", 0);	
       });
@@ -643,10 +662,10 @@ var compareCountries = function(){
           .transition()		
           .duration(200)
           .style("opacity", .9);		
-        div.transition()		
+        tooltipDiv.transition()		
           .duration(200)		
           .style("opacity", .9);		
-        div.html(country2iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+        tooltipDiv.html(country2iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
           .style("left", (d3.event.pageX) + "px")		
           .style("top", (d3.event.pageY - 28) + "px");	
       })					
@@ -655,7 +674,7 @@ var compareCountries = function(){
           .transition()
           .duration(500)		
           .style("opacity", 0);		
-        div.transition()		
+        tooltipDiv.transition()		
           .duration(500)		
           .style("opacity", 0);	
       });
