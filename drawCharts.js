@@ -1,62 +1,4 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style> /* set the CSS */
-
-body {
-  font-family: sans-serif;
-  color: #444;
-}
-
-.line {
-    fill: none;
-    //stroke: #ffab00;
-    stroke-width: 3;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-.axis text {
-  font-size: 10px;
-}
-
-div.tooltip {	
-    position: absolute;			
-    text-align: center;			
-    //width: 80px;					
-    //height: 38px;					
-    padding: 2px;				
-    font: 12px sans-serif;		
-    background: lightsteelblue;	
-    border: 0px;		
-    border-radius: 8px;			
-    pointer-events: none;			
-    display: inline-block;
-}
-
-</style>
-<body>
-
-<h4>Cases in The world</h4>
-
-<label for="country">Choose a country:</label>
-<select id="country" onchange="populateData(this.value)"></select>
-
-<svg id="svgLineChart"></svg>
-  <select id="dailyDropdown">
-      <option value="NewConfirmed" selected="selected">New Confirmed Cases Per Day</option>
-      <option value="NewDeaths">New Deaths Per Day</option>
-      <option value="NewRecovered">Recovered Patients Per Day</option>
-  </select>
-<svg id="svgBarGraph"> </svg>
-<!-- load the d3.js library -->    	
-<!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
-<script src="https://d3js.org/d3.v5.js"></script>
-
-<script>
+const apiRoot = "https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu";
 const margin = {top: 20, right: 20, bottom: 50, left: 70},
     width = 500 - margin.left - margin.right,
     height = 360 - margin.top - margin.bottom;
@@ -83,11 +25,13 @@ var svgLineChart = d3.select("#svgLineChart")
           "translate(" + margin.left + "," + margin.top + ")");
 
 var svgBarGraph = d3.select("#svgBarGraph")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform",
+    "translate(" + margin.left + "," + margin.top + ")");
+
+var svgPieChartDiv= d3.select('#svgPieChartDiv')
 
 var legendScale = d3.scaleOrdinal()
   .domain(Object.keys(colors))
@@ -158,15 +102,18 @@ d3.json("https://covid19.mathdro.id/api/countries").then(function(data) {
   console.log(error);
 });
 
-var populateData = function(country){
-  d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + country).then(function(data) {
+var populateData = function(countryISO3){
+  d3.json(apiRoot + "/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function(data) {
     try {
       data = cleanData(data[0].timeseries);
     } catch (e) {
-      alert("No data available for iso3 code " + country);
+      alert("No data available for iso3 code " + countryISO3);
     }
+
+    v = d3.select('#dailyDropdown').node().value;
+
     populateLineChart(data, svgLineChart);
-    populateBarGraph(data, svgBarGraph);
+    populateBarGraph(data, svgBarGraph, v);
 
     d3.select('.legend-group').remove();
     let group = d3.select("svg").append("g").attr("class","legend-group");
@@ -195,6 +142,12 @@ var populateData = function(country){
   })
   .catch(function(error){
     console.log(error);})
+
+  d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + countryISO3).then(function(data){
+    populatePieChart(data[0], svgPieChartDiv);
+  }).catch(function(error){
+    console.log(error);
+  })
 };
 
 var populateLineChart = function(data, svg){
@@ -368,8 +321,8 @@ var populateLineChart = function(data, svg){
 }
 
 d3.select('#dailyDropdown').on("change", function () {
-      country = d3.select('#country').node().value;
-      d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + country).then(function(data) {
+      countryISO3 = d3.select('#country').node().value;
+      d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function(data) {
       data = cleanData(data[0].timeseries);
         v = d3.select('#dailyDropdown').node().value;
         populateBarGraph(data, svgBarGraph, v);
@@ -453,6 +406,74 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
 }
 
 
+var populatePieChart = function(data, svgDiv){
+  svgDiv.selectAll("*").remove();
+  let width = 350;
+  let height = 350;
+  let radius = Math.min(width, height) / 2;
+  let donutWidth = 75;
+  let legendRectSize = 18;                                  // NEW
+  let legendSpacing = 4;                                    // NEW
 
-    </script>
-    </body>
+  let color = d3.scaleOrdinal()
+    .domain(Object.keys(colors))
+    .range(Object.values(colors));
+
+  let newData = []
+  newData.push({label: 'Confirmed', value: data.confirmed});
+  newData.push({label: 'Deaths', value: data.deaths});
+  newData.push({label: 'Recovered', value: data.recovered});
+
+  data = newData
+
+  let svg = svgDiv.append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .append('g')
+    .attr('transform', 'translate(' + (width / 2) + 
+      ',' + (height / 2) + ')');
+
+  let arc = d3.arc()
+    .innerRadius(radius - donutWidth)
+    .outerRadius(radius);
+
+  let pie = d3.pie()
+    .value(function(d) { return d.value; })
+    .sort(null);
+
+  let path = svg.selectAll('path')
+    .data(pie(data))
+    .enter()
+    .append('path')
+    .attr('d', arc)
+    .attr('fill', function(d, i) { 
+      return color(d.data.label);
+    });
+
+  let legend = svg.selectAll('.legend')                     // NEW
+    .data(color.domain())                                   // NEW
+    .enter()                                                // NEW
+    .append('g')                                            // NEW
+    .attr('class', 'legend')                                // NEW
+    .attr('transform', function(d, i) {                     // NEW
+      let height = legendRectSize + legendSpacing;          // NEW
+      let offset =  height * color.domain().length / 2;     // NEW
+      let horz = -2 * legendRectSize;                       // NEW
+      let vert = i * height - offset;                       // NEW
+      return 'translate(' + horz + ',' + vert + ')';        // NEW
+    });                                                     // NEW
+
+  legend.append('rect')                                     // NEW
+    .attr('width', legendRectSize)                          // NEW
+    .attr('height', legendRectSize)                         // NEW
+    .style('fill', color)                                   // NEW
+    .style('stroke', color);                                // NEW
+
+  legend.append('text')                                     // NEW
+    .attr('x', legendRectSize + legendSpacing)              // NEW
+    .attr('y', legendRectSize - legendSpacing)              // NEW
+    .text(function(d) { return d; });                     
+
+}
+
+
