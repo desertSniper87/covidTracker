@@ -1,7 +1,7 @@
 const apiRoot = "https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu";
 const margin = {top: 20, right: 20, bottom: 50, left: 70},
-    width = 500 - margin.left - margin.right,
-    height = 360 - margin.top - margin.bottom;
+  width = 500 - margin.left - margin.right,
+  height = 360 - margin.top - margin.bottom;
 
 // parse the date / time
 const parseTime = d3.timeParse("%m/%d/%y");
@@ -18,11 +18,11 @@ var t = d3.transition()
   .ease(d3.easeLinear); 
 
 var svgLineChart = d3.select("#svgLineChart")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform",
+    "translate(" + margin.left + "," + margin.top + ")");
 
 var svgBarGraph = d3.select("#svgBarGraph")
   .attr("width", width + margin.left + margin.right)
@@ -65,7 +65,7 @@ var cleanData = function(data){
 
     d.NewDeaths = data[k].deaths - prevDeaths;
     prevDeaths = +data[k].deaths;
-      
+
     d.NewRecovered = data[k].recovered - prevRecovered;
     prevRecovered = +data[k].recovered;
 
@@ -75,8 +75,8 @@ var cleanData = function(data){
   data = newData
   var daysWithoutIncident = data.filter(function (el) {
     return el.confirmed == 0 &&
-           el.deaths == 0 &&
-           el.recovered == 0;
+      el.deaths == 0 &&
+      el.recovered == 0;
   });
 
   data.splice(0, daysWithoutIncident.length-1);
@@ -117,8 +117,8 @@ var populateDropdown = function(data){
     .append("option");
 
   options.text(function(d) {
-      return d.name;
-    })
+    return d.name;
+  })
     .attr("value", function(d) {
       return d.iso3;
     });
@@ -145,8 +145,8 @@ var populateData = function(countryISO3){
 
     appendLegend('#svgLineChart', legendScale);
   })
-  .catch(function(error){
-    console.log(error);})
+    .catch(function(error){
+      console.log(error);})
 
   d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + countryISO3).then(function(data){
     populatePieChart(data[0], svgPieChartDiv);
@@ -189,21 +189,21 @@ var populateLineChart = function(data, svg){
   let y = d3.scaleLinear().range([height, 0]);
 
   let valueline_confirmed = d3.line()
-      .x(function(d) { return x(d.date); })
-      .y(function(d) { return y(d.confirmed); });
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.confirmed); });
 
   let valueline_deaths = d3.line()
-      .x(function(d) { return x(d.date); })
-      .y(function(d) { return y(d.deaths); });
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.deaths); });
 
   let valueline_recovered = d3.line()
-      .x(function(d) { return x(d.date); })
-      .y(function(d) { return y(d.recovered); });
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.recovered); });
 
   // Define the div for the tooltip
   let div = d3.select("body").append("div")	
-      .attr("class", "tooltip")				
-      .style("opacity", 0);
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
   y.domain([0, d3.max(data, function(d) { 
@@ -234,30 +234,30 @@ var populateLineChart = function(data, svg){
   svg.append("g")
     .call(d3.axisLeft(y));
   //svg.append('text')                                     
-    //.attr('x', 10)              
-    //.attr('y', -5)             
-    //.text('Data taken from Johns Hopkins CSSE'); 
+  //.attr('x', 10)              
+  //.attr('y', -5)             
+  //.text('Data taken from Johns Hopkins CSSE'); 
 
   d3.select(".line_c")
-        .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength() ) 
-        .attr("stroke-dashoffset", path_c.node().getTotalLength())
-        .transition(t)
-        .attr("stroke-dashoffset", 0)
-        .style("stroke", colors["Confirmed"]);
+    .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength() ) 
+    .attr("stroke-dashoffset", path_c.node().getTotalLength())
+    .transition(t)
+    .attr("stroke-dashoffset", 0)
+    .style("stroke", colors["Confirmed"]);
 
   d3.select(".line_d")
-        .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength() ) 
-        .attr("stroke-dashoffset", path_d.node().getTotalLength())
-        .transition(t)
-        .attr("stroke-dashoffset", 0)
-        .style("stroke", colors["Deaths"]);
+    .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength() ) 
+    .attr("stroke-dashoffset", path_d.node().getTotalLength())
+    .transition(t)
+    .attr("stroke-dashoffset", 0)
+    .style("stroke", colors["Deaths"]);
 
   d3.select(".line_r")
-        .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength() ) 
-        .attr("stroke-dashoffset", path_r.node().getTotalLength())
-        .transition(t)
-        .attr("stroke-dashoffset", 0)
-        .style("stroke", colors["Recovered"]);
+    .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength() ) 
+    .attr("stroke-dashoffset", path_r.node().getTotalLength())
+    .transition(t)
+    .attr("stroke-dashoffset", 0)
+    .style("stroke", colors["Recovered"]);
 
   svg.selectAll("dot")	
     .data(data)			
@@ -353,15 +353,15 @@ var populateLineChart = function(data, svg){
 }
 
 d3.select('#dailyDropdown').on("change", function () {
-      countryISO3 = d3.select('#country').node().value;
-      d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function(data) {
-      data = cleanData(data[0].timeseries);
-        v = d3.select('#dailyDropdown').node().value;
-        populateBarGraph(data, svgBarGraph, v);
-      })
-      .catch(function(error){
-        console.log(error);
-      })
+  countryISO3 = d3.select('#country').node().value;
+  d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function(data) {
+    data = cleanData(data[0].timeseries);
+    v = d3.select('#dailyDropdown').node().value;
+    populateBarGraph(data, svgBarGraph, v);
+  })
+    .catch(function(error){
+      console.log(error);
+    })
 });
 
 var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
@@ -402,8 +402,8 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
         d[dailyValue] +
         " new " +
         dailyValue.slice(3).toLowerCase())
-      .style("left", (d3.event.pageX) + "px")		
-      .style("top", (d3.event.pageY - 28) + "px");	
+        .style("left", (d3.event.pageX) + "px")		
+        .style("top", (d3.event.pageY - 28) + "px");	
     })					
     .on("mouseout", function(d) {		
       d3.select(this)
@@ -430,8 +430,8 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
     .attr("class", "axis")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(barX)
-                          .ticks(5)
-                          .tickFormat(formatDateToString));
+      .ticks(5)
+      .tickFormat(formatDateToString));
 
   svg.append("g")
     .call(d3.axisLeft(y));
@@ -465,22 +465,33 @@ var populatePieChart = function(data, svgDiv){
     .attr('transform', 'translate(' + (width / 2) + 
       ',' + (height / 2) + ')');
 
+  let pie = d3.pie()
+    .sort(null)
+    .startAngle(1.1*Math.PI)
+    .endAngle(3.1*Math.PI)
+    .value(function(d) { return d.value; })
+
   let arc = d3.arc()
     .innerRadius(radius - donutWidth)
     .outerRadius(radius);
 
-  let pie = d3.pie()
-    .value(function(d) { return d.value; })
-    .sort(null);
-
-  let path = svg.selectAll('path')
+  let g = svg.selectAll(".arc")
     .data(pie(data))
-    .enter()
-    .append('path')
-    .attr('d', arc)
-    .attr('fill', function(d, i) { 
-      return color(d.data.label);
-    });
+    .enter().append("g")
+    .attr("class", "arc");
+
+  g.append("path")
+    .style("fill", function(d) { return color(d.data.label); })
+    .transition().delay(function(d,i) {
+      return i * 500; }).duration(500)
+    .attrTween('d', function(d) {
+      var i = d3.interpolate(d.startAngle+0.1, d.endAngle);
+      return function(t) {
+        d.endAngle = i(t); 
+        return arc(d)
+      }
+    }); 
+
 
   let legend = svg.selectAll('.legend')                     
     .data(color.domain())                                   
@@ -527,21 +538,21 @@ var compareCountries = function(){
     let y = d3.scaleLinear().range([height, 0]);
 
     let valueline = d3.line()
-        .x(function(d) { return x(d.daysPassed); })
-        .y(function(d) { return y(d[measure]); });
+      .x(function(d) { return x(d.daysPassed); })
+      .y(function(d) { return y(d[measure]); });
 
     // Define the div for the tooltip
     let div = d3.select("body").append("div")	
-        .attr("class", "tooltip")				
-        .style("opacity", 0);
+      .attr("class", "tooltip")				
+      .style("opacity", 0);
 
     const color10C = d3.scaleOrdinal(d3.schemeCategory10)
 
     x.domain([0, Math.max(d3.max(dataCountry1, function(d) { return d.daysPassed; }),
-                          d3.max(dataCountry2, function(d) { return d.daysPassed; }))]);
+      d3.max(dataCountry2, function(d) { return d.daysPassed; }))]);
 
     y.domain([0, Math.max(d3.max(dataCountry1, function(d) { return Math.max(d[measure]); }),
-                          d3.max(dataCountry2, function(d) { return Math.max(d[measure]); }))]);
+      d3.max(dataCountry2, function(d) { return Math.max(d[measure]); }))]);
 
     //console.log(measure, dataCountry1, dataCountry2, valueline);
 
@@ -564,30 +575,30 @@ var compareCountries = function(){
     svgCompareGraph.append("g")
       .call(d3.axisLeft(y));
     //svg.append('text')                                     
-      //.attr('x', 10)              
-      //.attr('y', -5)             
-      //.text('Data taken from Johns Hopkins CSSE'); 
+    //.attr('x', 10)              
+    //.attr('y', -5)             
+    //.text('Data taken from Johns Hopkins CSSE'); 
 
     d3.select(".lineC1")
-          .attr("stroke-dasharray", pathC1.node().getTotalLength() + " " + pathC1.node().getTotalLength() ) 
-          .attr("stroke-dashoffset", pathC1.node().getTotalLength())
-          .transition(t)
-          .attr("stroke-dashoffset", 0)
-          .style("stroke", color10C(country1iso3));
+      .attr("stroke-dasharray", pathC1.node().getTotalLength() + " " + pathC1.node().getTotalLength() ) 
+      .attr("stroke-dashoffset", pathC1.node().getTotalLength())
+      .transition(t)
+      .attr("stroke-dashoffset", 0)
+      .style("stroke", color10C(country1iso3));
 
     d3.select(".lineC2")
-          .attr("stroke-dasharray", pathC2.node().getTotalLength() + " " + pathC2.node().getTotalLength() ) 
-          .attr("stroke-dashoffset", pathC2.node().getTotalLength())
-          .transition(t)
-          .attr("stroke-dashoffset", 0)
-          .style("stroke", color10C(country2iso3));
+      .attr("stroke-dasharray", pathC2.node().getTotalLength() + " " + pathC2.node().getTotalLength() ) 
+      .attr("stroke-dashoffset", pathC2.node().getTotalLength())
+      .transition(t)
+      .attr("stroke-dashoffset", 0)
+      .style("stroke", color10C(country2iso3));
 
     svgCompareGraph.append("text")             
-        .attr("transform",
-              "translate(" + (width/2) + " ," + 
-                             (height + margin.top + 20) + ")")
-        .style("text-anchor", "middle")
-        .text("Days since first case");
+      .attr("transform",
+        "translate(" + (width/2) + " ," + 
+        (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .text("Days since first case");
 
     svgCompareGraph.selectAll("dot")	
       .data(dataCountry1)			
@@ -619,39 +630,39 @@ var compareCountries = function(){
           .style("opacity", 0);	
       });
 
-      svgCompareGraph.selectAll("dot")	
-        .data(dataCountry2)			
-        .enter().append("circle")								
-        .attr("r", 7)		
-        .attr("cx", function(d) { return x(d.daysPassed ); })		 
-        .attr("cy", function(d) { return y(d[measure]); })		
-        .style("fill", color10C(country2iso3))
-        .style("opacity", 0)
-        .on("mouseover", function(d) {		
-          d3.select(this)
-            .transition()		
-            .duration(200)
-            .style("opacity", .9);		
-          div.transition()		
-            .duration(200)		
-            .style("opacity", .9);		
-          div.html(country2iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
-            .style("left", (d3.event.pageX) + "px")		
-            .style("top", (d3.event.pageY - 28) + "px");	
-        })					
-        .on("mouseout", function(d) {		
-          d3.select(this)
-            .transition()
-            .duration(500)		
-            .style("opacity", 0);		
-          div.transition()		
-            .duration(500)		
-            .style("opacity", 0);	
-        });
-        appendLegend('#svgCompareGraph', color10C )
+    svgCompareGraph.selectAll("dot")	
+      .data(dataCountry2)			
+      .enter().append("circle")								
+      .attr("r", 7)		
+      .attr("cx", function(d) { return x(d.daysPassed ); })		 
+      .attr("cy", function(d) { return y(d[measure]); })		
+      .style("fill", color10C(country2iso3))
+      .style("opacity", 0)
+      .on("mouseover", function(d) {		
+        d3.select(this)
+          .transition()		
+          .duration(200)
+          .style("opacity", .9);		
+        div.transition()		
+          .duration(200)		
+          .style("opacity", .9);		
+        div.html(country2iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+          .style("left", (d3.event.pageX) + "px")		
+          .style("top", (d3.event.pageY - 28) + "px");	
+      })					
+      .on("mouseout", function(d) {		
+        d3.select(this)
+          .transition()
+          .duration(500)		
+          .style("opacity", 0);		
+        div.transition()		
+          .duration(500)		
+          .style("opacity", 0);	
+      });
+    appendLegend('#svgCompareGraph', color10C )
 
-    }).catch(function(error){
-      alert("No data available for Bahamas" );
+  }).catch(function(error){
+    alert("No data available for Bahamas" );
   });
 
 
