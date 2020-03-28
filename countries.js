@@ -1,4 +1,4 @@
-[
+var countriesData = [
   {
     "name": "Afghanistan",
     "iso2": "AF",

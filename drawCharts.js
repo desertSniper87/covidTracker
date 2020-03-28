@@ -31,11 +31,13 @@ var svgBarGraph = d3.select("#svgBarGraph")
   .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
 
-var svgPieChartDiv= d3.select('#svgPieChartDiv')
-
-var legendScale = d3.scaleOrdinal()
-  .domain(Object.keys(colors))
-  .range(Object.values(colors));
+var svgPieChartDiv= d3.select('#svgPieChartDiv');
+var svgCompareGraph= d3.select('#svgCompareGraph')
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform",
+    "translate(" + margin.left + "," + margin.top + ")");
 
 
 var filterDataByCountry = function(data, country){
@@ -81,8 +83,34 @@ var cleanData = function(data){
   return data;
 }
 
+var cleanDataForComparison = function(data){
+  let newData = []
+  Object.keys(data).forEach(function(k) {
+    //console.log(data[k])
+    let d = {}
+
+    d.date = parseTime(k);
+    d.confirmed = +data[k].confirmed;
+    d.deaths= +data[k].deaths;
+    d.recovered= +data[k].recovered;
+
+    newData.push(d);
+  });
+
+  data = newData
+  var daysWithoutIncident = data.filter(function (el) {
+    return el.confirmed == 0;
+  });
+
+  data.splice(0, daysWithoutIncident.length-1);
+  data.forEach(function(d, i){
+    d.daysPassed = i;
+  })
+  return data;
+}
+
 var populateDropdown = function(data){
-  let dropDown = d3.select("#country");
+  let dropDown = d3.selectAll(".countryDropdown");
   let options = dropDown.selectAll("option")
     .data(data)
     .enter()
@@ -96,11 +124,7 @@ var populateDropdown = function(data){
     });
 }
 
-d3.json("https://covid19.mathdro.id/api/countries").then(function(data) {
-  populateDropdown(data.countries);
-}).catch(function(error){
-  console.log(error);
-});
+populateDropdown(countriesData);
 
 var populateData = function(countryISO3){
   d3.json(apiRoot + "/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function(data) {
@@ -115,30 +139,11 @@ var populateData = function(countryISO3){
     populateLineChart(data, svgLineChart);
     populateBarGraph(data, svgBarGraph, v);
 
-    d3.select('.legend-group').remove();
-    let group = d3.select("svg").append("g").attr("class","legend-group");
+    let legendScale = d3.scaleOrdinal()
+      .domain(Object.keys(colors))
+      .range(Object.values(colors));
 
-    let legend = group.selectAll(".legend")
-      .data(legendScale.domain().slice())
-      .enter().append("g")
-      .attr("class","legend")
-      .attr("transform",function(d,i) {
-        return "translate(0," + i * 20 + ")";
-      });
-
-    legend.append("rect")
-      .attr("x",475)
-      .attr("y",65)
-      .attr("width",18)
-      .attr("height",18)
-      .style("fill", legendScale);
-
-    legend.append("text")
-      .attr("x",465)
-      .attr("y",73)
-      .attr("dy",".35em")
-      .style("text-anchor","end")
-      .text(function(d) { return d; });
+    appendLegend('#svgLineChart', legendScale);
   })
   .catch(function(error){
     console.log(error);})
@@ -149,6 +154,33 @@ var populateData = function(countryISO3){
     console.log(error);
   })
 };
+
+var appendLegend = function(svgID, legendScale){
+  d3.select('.legend-group').remove();
+  let group = d3.select(svgID).append("g").attr("class","legend-group");
+
+  let legend = group.selectAll(".legend")
+    .data(legendScale.domain().slice())
+    .enter().append("g")
+    .attr("class","legend")
+    .attr("transform",function(d,i) {
+      return "translate(0," + i * 20 + ")";
+    });
+
+  legend.append("rect")
+    .attr("x",475)
+    .attr("y",65)
+    .attr("width",18)
+    .attr("height",18)
+    .style("fill", legendScale);
+
+  legend.append("text")
+    .attr("x",465)
+    .attr("y",73)
+    .attr("dy",".35em")
+    .style("text-anchor","end")
+    .text(function(d) { return d; });
+}
 
 var populateLineChart = function(data, svg){
   svg.selectAll("*").remove();
@@ -201,10 +233,10 @@ var populateLineChart = function(data, svg){
   // Add the y Axis
   svg.append("g")
     .call(d3.axisLeft(y));
-  svg.append('text')                                     
-    .attr('x', 10)              
-    .attr('y', -5)             
-    .text('Data taken from Johns Hopkins CSSE'); 
+  //svg.append('text')                                     
+    //.attr('x', 10)              
+    //.attr('y', -5)             
+    //.text('Data taken from Johns Hopkins CSSE'); 
 
   d3.select(".line_c")
         .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength() ) 
@@ -412,8 +444,8 @@ var populatePieChart = function(data, svgDiv){
   let height = 350;
   let radius = Math.min(width, height) / 2;
   let donutWidth = 75;
-  let legendRectSize = 18;                                  // NEW
-  let legendSpacing = 4;                                    // NEW
+  let legendRectSize = 18;                                  
+  let legendSpacing = 4;                                    
 
   let color = d3.scaleOrdinal()
     .domain(Object.keys(colors))
@@ -450,30 +482,179 @@ var populatePieChart = function(data, svgDiv){
       return color(d.data.label);
     });
 
-  let legend = svg.selectAll('.legend')                     // NEW
-    .data(color.domain())                                   // NEW
-    .enter()                                                // NEW
-    .append('g')                                            // NEW
-    .attr('class', 'legend')                                // NEW
-    .attr('transform', function(d, i) {                     // NEW
-      let height = legendRectSize + legendSpacing;          // NEW
-      let offset =  height * color.domain().length / 2;     // NEW
-      let horz = -2 * legendRectSize;                       // NEW
-      let vert = i * height - offset;                       // NEW
-      return 'translate(' + horz + ',' + vert + ')';        // NEW
-    });                                                     // NEW
+  let legend = svg.selectAll('.legend')                     
+    .data(color.domain())                                   
+    .enter()                                                
+    .append('g')                                            
+    .attr('class', 'legend')                                
+    .attr('transform', function(d, i) {                     
+      let height = legendRectSize + legendSpacing;          
+      let offset =  height * color.domain().length / 2;     
+      let horz = -2 * legendRectSize;                       
+      let vert = i * height - offset;                       
+      return 'translate(' + horz + ',' + vert + ')';        
+    });                                                     
 
-  legend.append('rect')                                     // NEW
-    .attr('width', legendRectSize)                          // NEW
-    .attr('height', legendRectSize)                         // NEW
-    .style('fill', color)                                   // NEW
-    .style('stroke', color);                                // NEW
+  legend.append('rect')                                     
+    .attr('width', legendRectSize)                          
+    .attr('height', legendRectSize)                         
+    .style('fill', color)                                   
+    .style('stroke', color);                                
 
-  legend.append('text')                                     // NEW
-    .attr('x', legendRectSize + legendSpacing)              // NEW
-    .attr('y', legendRectSize - legendSpacing)              // NEW
+  legend.append('text')                                     
+    .attr('x', legendRectSize + legendSpacing)              
+    .attr('y', legendRectSize - legendSpacing)              
     .text(function(d) { return d; });                     
 
 }
 
+var compareCountries = function(){
+  country1iso3 = d3.select('#country1').node().value; 
+  country2iso3 = d3.select('#country2').node().value; 
+  measure = d3.select('#compareDropdown').node().value; 
+
+  svgCompareGraph.selectAll("*").remove();
+
+  Promise.all([
+    d3.json(apiRoot + "/timeseries?onlyCountries=true&iso3=" + country1iso3),
+    d3.json(apiRoot + "/timeseries?onlyCountries=true&iso3=" + country2iso3)
+  ]).then(function(data) {
+
+    dataCountry1 = cleanDataForComparison(data[0][0].timeseries)
+    dataCountry2 = cleanDataForComparison(data[1][0].timeseries)
+
+    let x = d3.scaleLinear().range([0, width]);
+    let y = d3.scaleLinear().range([height, 0]);
+
+    let valueline = d3.line()
+        .x(function(d) { return x(d.daysPassed); })
+        .y(function(d) { return y(d[measure]); });
+
+    // Define the div for the tooltip
+    let div = d3.select("body").append("div")	
+        .attr("class", "tooltip")				
+        .style("opacity", 0);
+
+    const color10C = d3.scaleOrdinal(d3.schemeCategory10)
+
+    x.domain([0, Math.max(d3.max(dataCountry1, function(d) { return d.daysPassed; }),
+                          d3.max(dataCountry2, function(d) { return d.daysPassed; }))]);
+
+    y.domain([0, Math.max(d3.max(dataCountry1, function(d) { return Math.max(d[measure]); }),
+                          d3.max(dataCountry2, function(d) { return Math.max(d[measure]); }))]);
+
+    //console.log(measure, dataCountry1, dataCountry2, valueline);
+
+    // Add the valueline path.
+    pathC1 = svgCompareGraph.append("path")
+      .data([dataCountry1])
+      .attr("class", "line lineC1")
+      .attr("d", valueline)
+
+    pathC2 = svgCompareGraph.append("path")
+      .data([dataCountry2])
+      .attr("class", "line lineC2")
+      .attr("d", valueline)
+
+
+    svgCompareGraph.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).ticks(6));
+
+    svgCompareGraph.append("g")
+      .call(d3.axisLeft(y));
+    //svg.append('text')                                     
+      //.attr('x', 10)              
+      //.attr('y', -5)             
+      //.text('Data taken from Johns Hopkins CSSE'); 
+
+    d3.select(".lineC1")
+          .attr("stroke-dasharray", pathC1.node().getTotalLength() + " " + pathC1.node().getTotalLength() ) 
+          .attr("stroke-dashoffset", pathC1.node().getTotalLength())
+          .transition(t)
+          .attr("stroke-dashoffset", 0)
+          .style("stroke", color10C(country1iso3));
+
+    d3.select(".lineC2")
+          .attr("stroke-dasharray", pathC2.node().getTotalLength() + " " + pathC2.node().getTotalLength() ) 
+          .attr("stroke-dashoffset", pathC2.node().getTotalLength())
+          .transition(t)
+          .attr("stroke-dashoffset", 0)
+          .style("stroke", color10C(country2iso3));
+
+    svgCompareGraph.append("text")             
+        .attr("transform",
+              "translate(" + (width/2) + " ," + 
+                             (height + margin.top + 20) + ")")
+        .style("text-anchor", "middle")
+        .text("Days since first case");
+
+    svgCompareGraph.selectAll("dot")	
+      .data(dataCountry1)			
+      .enter().append("circle")								
+      .attr("r", 7)		
+      .attr("cx", function(d) { return x(d.daysPassed ); })		 
+      .attr("cy", function(d) { return y(d[measure]); })		
+      .style("fill", color10C(country1iso3))
+      .style("opacity", 0)
+      .on("mouseover", function(d) {		
+        d3.select(this)
+          .transition()		
+          .duration(200)
+          .style("opacity", .9);		
+        div.transition()		
+          .duration(200)		
+          .style("opacity", .9);		
+        div.html(country1iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+          .style("left", (d3.event.pageX) + "px")		
+          .style("top", (d3.event.pageY - 28) + "px");	
+      })					
+      .on("mouseout", function(d) {		
+        d3.select(this)
+          .transition()
+          .duration(500)		
+          .style("opacity", 0);		
+        div.transition()		
+          .duration(500)		
+          .style("opacity", 0);	
+      });
+
+      svgCompareGraph.selectAll("dot")	
+        .data(dataCountry2)			
+        .enter().append("circle")								
+        .attr("r", 7)		
+        .attr("cx", function(d) { return x(d.daysPassed ); })		 
+        .attr("cy", function(d) { return y(d[measure]); })		
+        .style("fill", color10C(country2iso3))
+        .style("opacity", 0)
+        .on("mouseover", function(d) {		
+          d3.select(this)
+            .transition()		
+            .duration(200)
+            .style("opacity", .9);		
+          div.transition()		
+            .duration(200)		
+            .style("opacity", .9);		
+          div.html(country2iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+            .style("left", (d3.event.pageX) + "px")		
+            .style("top", (d3.event.pageY - 28) + "px");	
+        })					
+        .on("mouseout", function(d) {		
+          d3.select(this)
+            .transition()
+            .duration(500)		
+            .style("opacity", 0);		
+          div.transition()		
+            .duration(500)		
+            .style("opacity", 0);	
+        });
+        appendLegend('#svgCompareGraph', color10C )
+
+    }).catch(function(error){
+      alert("No data available for Bahamas" );
+  });
+
+
+
+}
 
