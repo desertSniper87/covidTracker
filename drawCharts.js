@@ -91,7 +91,6 @@ var cleanData = function(data){
 var cleanDataForComparison = function(data){
   let newData = []
   Object.keys(data).forEach(function(k) {
-    //console.log(data[k])
     let d = {}
 
     d.date = parseTime(k);
@@ -268,7 +267,7 @@ var populateLineChart = function(data, svg){
     .attr("cy", function(d) { return y(d.confirmed); })		
     .style("fill", colors["Confirmed"])
     .style("opacity", 0)
-    .on("mouseover", function(d) {		
+    .on("mousemove", function(d) {		
       d3.select(this)
         .transition()		
         .duration(200)
@@ -298,7 +297,7 @@ var populateLineChart = function(data, svg){
     .attr("cy", function(d) { return y(d.deaths); })		
     .style("fill", colors["Deaths"])
     .style("opacity", 0)
-    .on("mouseover", function(d) {		
+    .on("mousemove", function(d) {		
       d3.select(this)
         .transition()		
         .duration(200)
@@ -329,7 +328,7 @@ var populateLineChart = function(data, svg){
     .attr("cy", function(d) { return y(d.recovered); })		
     .style("fill", colors["Recovered"])
     .style("opacity", 0)
-    .on("mouseover", function(d) {		
+    .on("mousemove", function(d) {		
       d3.select(this)
         .transition()		
         .duration(200)
@@ -385,7 +384,7 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
     .attr("width", x.bandwidth())
     .attr("y", function(d) { return y(d[dailyValue]); })
     .attr("height", 0)
-    .on("mouseover", function(d) {		
+    .on("mousemove", function(d) {		
       d3.select(this)
         .transition()
         .duration(500)		
@@ -465,7 +464,7 @@ var populatePieChart = function(data, svgDiv){
 
   let svg = svgDiv.append('svg')
     .attr('width', width)
-    .attr('height', height)
+    .attr('height', height + 100)
     .append('g')
     .attr('transform', 'translate(' + (width / 2) + 
       ',' + (height / 2) + ')');
@@ -485,6 +484,13 @@ var populatePieChart = function(data, svgDiv){
     .enter().append("g")
     .attr("class", "arc");
 
+  svg.append("text")             
+    .attr("transform",
+      "translate(" + (width/2 - 170) + " ," + 
+      (height + margin.top - 150) + ")")
+    .style("text-anchor", "middle")
+    .text("Total Confirmed Cases: " + confirmed);
+
   g.append("path")
     .style("fill", function(d) { return color(d.data.label); })
     .transition().delay(function(d,i) {
@@ -500,8 +506,6 @@ var populatePieChart = function(data, svgDiv){
 
   path.on('mousemove', function(d) {
     let percent = Math.round(1000 * d.data.value / confirmed) / 10;
-    console.log("data: ", data);
-    console.log("d: ", d);
 
     tooltipDiv.transition()		
       .duration(200)		
@@ -573,7 +577,6 @@ var compareCountries = function(){
     y.domain([0, Math.max(d3.max(dataCountry1, function(d) { return Math.max(d[measure]); }),
       d3.max(dataCountry2, function(d) { return Math.max(d[measure]); }))]);
 
-    //console.log(measure, dataCountry1, dataCountry2, valueline);
 
     // Add the valueline path.
     pathC1 = svgCompareGraph.append("path")
@@ -627,7 +630,7 @@ var compareCountries = function(){
       .attr("cy", function(d) { return y(d[measure]); })		
       .style("fill", color10C(country1iso3))
       .style("opacity", 0)
-      .on("mouseover", function(d) {		
+      .on("mousemove", function(d) {		
         d3.select(this)
           .transition()		
           .duration(200)
@@ -657,7 +660,7 @@ var compareCountries = function(){
       .attr("cy", function(d) { return y(d[measure]); })		
       .style("fill", color10C(country2iso3))
       .style("opacity", 0)
-      .on("mouseover", function(d) {		
+      .on("mousemove", function(d) {		
         d3.select(this)
           .transition()		
           .duration(200)
@@ -683,8 +686,5 @@ var compareCountries = function(){
   }).catch(function(error){
     alert("No data available for Bahamas" );
   });
-
-
-
 }
 

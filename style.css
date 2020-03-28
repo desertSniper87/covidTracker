@@ -19,6 +19,10 @@ body {
   font-size: 10px;
 }
 
+circle{
+    padding: 10px;
+}
+
 div.tooltip {	
     position: absolute;			
     text-align: center;			
