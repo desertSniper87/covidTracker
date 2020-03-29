@@ -12,6 +12,18 @@ const colors = {
   "Deaths": "#000000",
   "Recovered": "#00FF00",
 }
+
+let pieColors = ({
+  "Active Cases": "#F38A32",
+  "Deaths": "#909090",
+  "Recovered": "#59B215",
+})
+
+let pieHoverColors = ({
+  "Active Cases": "#DC6705",
+  "Deaths": "#4F4F4F",
+  "Recovered": "#418210",
+})
 var tooltipDiv = d3.select("body").append("div")	
   .attr("class", "tooltip")				
   .style("opacity", 0);
@@ -442,15 +454,9 @@ var populatePieChart = function(data, svgDiv){
   let legendRectSize = 18;                                  
   let legendSpacing = 4;                                    
 
-  let colors = ({
-    "Active Cases": "#FFA500",
-    "Deaths": "#000000",
-    "Recovered": "#00FF00",
-  })
-
   let color = d3.scaleOrdinal()
-    .domain(Object.keys(colors))
-    .range(Object.values(colors));
+    .domain(Object.keys(pieColors))
+    .range(Object.values(pieColors));
 
   let newData = []
   //newData.push({label: 'Confirmed', value: data.confirmed});
@@ -471,9 +477,10 @@ var populatePieChart = function(data, svgDiv){
 
   let pie = d3.pie()
     .sort(null)
+    .padAngle(.02)
     .startAngle(1.1*Math.PI)
     .endAngle(3.1*Math.PI)
-    .value(function(d) { return d.value; })
+    .value(function(d) { return d.value; });
 
   let arc = d3.arc()
     .innerRadius(radius - donutWidth)
@@ -504,20 +511,26 @@ var populatePieChart = function(data, svgDiv){
     }); 
   let path = svg.selectAll('path');
 
-  path.on('mousemove', function(d) {
-    let percent = Math.round(1000 * d.data.value / confirmed) / 10;
+  path
+    .on('mouseover', function(d){
+      d3.select(this).style("fill", function(d) { return pieHoverColors[d.data.label]; })
+    })
+    .on('mousemove', function(d) {
+      let percent = Math.round(1000 * d.data.value / confirmed) / 10;
 
-    tooltipDiv.transition()		
-      .duration(200)		
-      .style("opacity", .9);		
-    tooltipDiv.html(d.data.value + " " + d.data.label + "<br/>" +  percent + '%')	
-      .style("left", (d3.event.pageX) + "px")		
-      .style("top", (d3.event.pageY - 28) + "px");	
-  }).on("mouseout", function(d) {		
-    tooltipDiv.transition()		
-      .duration(500)		
-      .style("opacity", 0);	
-  });
+      tooltipDiv.transition()		
+        .duration(200)		
+        .style("opacity", .9);		
+      tooltipDiv.html(d.data.value + " " + d.data.label + "<br/>" +  percent + '%')	
+        .style("left", (d3.event.pageX) + "px")		
+        .style("top", (d3.event.pageY - 28) + "px");	
+    })
+    .on("mouseout", function(d) {		
+      d3.select(this).style("fill", function(d) { return color(d.data.label); })
+      tooltipDiv.transition()		
+        .duration(500)		
+        .style("opacity", 0);	
+    });
 
 
   let legend = svg.selectAll('.legend')                     
@@ -543,7 +556,6 @@ var populatePieChart = function(data, svgDiv){
     .attr('x', legendRectSize + legendSpacing)              
     .attr('y', legendRectSize - legendSpacing)              
     .text(function(d) { return d; });                     
-
 }
 
 var compareCountries = function(){
