@@ -452,7 +452,8 @@ var populatePieChart = function(data, svgDiv){
   let radius = Math.min(width, height) / 2;
   let donutWidth = 75;
   let legendRectSize = 18;                                  
-  let legendSpacing = 4;                                    
+  let legendSpacing = 4;  
+  let hoverExtraRadius = 10;
 
   let color = d3.scaleOrdinal()
     .domain(Object.keys(pieColors))
@@ -469,11 +470,11 @@ var populatePieChart = function(data, svgDiv){
   data = newData
 
   let svg = svgDiv.append('svg')
-    .attr('width', width)
-    .attr('height', height + 100)
+    .attr('width', width + hoverExtraRadius * 2)
+    .attr('height', height + 100 + hoverExtraRadius * 2)
     .append('g')
-    .attr('transform', 'translate(' + (width / 2) + 
-      ',' + (height / 2) + ')');
+    .attr('transform', 'translate(' + (width / 2 + hoverExtraRadius) + 
+      ',' + (height / 2 + hoverExtraRadius) + ')');
 
   let pie = d3.pie()
     .sort(null)
@@ -485,6 +486,9 @@ var populatePieChart = function(data, svgDiv){
   let arc = d3.arc()
     .innerRadius(radius - donutWidth)
     .outerRadius(radius);
+  let arcHover = d3.arc()
+    .innerRadius(radius - donutWidth + hoverExtraRadius)
+    .outerRadius(radius + hoverExtraRadius);
 
   let g = svg.selectAll(".arc")
     .data(pie(data))
@@ -498,10 +502,13 @@ var populatePieChart = function(data, svgDiv){
     .style("text-anchor", "middle")
     .text("Total Confirmed Cases: " + confirmed);
 
+  let transitioning = true;
+  let delay = 500;
+
   g.append("path")
     .style("fill", function(d) { return color(d.data.label); })
-    .transition().delay(function(d,i) {
-      return i * 500; }).duration(500)
+    .transition("piePopulate").delay(function(d,i) {
+      return i * delay; }).duration(delay)
     .attrTween('d', function(d) {
       var i = d3.interpolate(d.startAngle+0.1, d.endAngle);
       return function(t) {
@@ -509,11 +516,31 @@ var populatePieChart = function(data, svgDiv){
         return arc(d)
       }
     }); 
+
+    timerid = setTimeout(() => {
+      transitioning = false;
+    }, data.length * delay);
+
+
   let path = svg.selectAll('path');
 
   path
     .on('mouseover', function(d){
-      d3.select(this).style("fill", function(d) { return pieHoverColors[d.data.label]; })
+      if (!transitioning){
+        d3.select(this).style("fill", function(d) { return pieHoverColors[d.data.label]; })
+        .attr("stroke","white")
+        .transition("pieHoverOver")
+        .duration(250)
+        .attr("d", arcHover)             
+        .attr("stroke-width",6);
+      }
+    })
+    .on("mouseleave", function(d) {
+        d3.select(this)
+           .transition("pieHoverLeave")            
+           .duration(250)
+           .attr("d", arc)
+           .attr("stroke","none");
     })
     .on('mousemove', function(d) {
       let percent = Math.round(1000 * d.data.value / confirmed) / 10;
