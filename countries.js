@@ -55,11 +55,6 @@ var countriesData = [
     "iso3": "AZE"
   },
   {
-    "name": "Bahamas",
-    "iso2": "BS",
-    "iso3": "BHS"
-  },
-  {
     "name": "Bahrain",
     "iso2": "BH",
     "iso3": "BHR"
@@ -128,12 +123,6 @@ var countriesData = [
     "name": "Burkina Faso",
     "iso2": "BF",
     "iso3": "BFA"
-  },
-  {
-    "name": "Burma"
-  },
-  {
-    "name": "Cabo Verde"
   },
   {
     "name": "Cambodia",
@@ -213,9 +202,6 @@ var countriesData = [
     "name": "Denmark",
     "iso2": "DK",
     "iso3": "DNK"
-  },
-  {
-    "name": "Diamond Princess"
   },
   {
     "name": "Djibouti",
@@ -843,9 +829,6 @@ var countriesData = [
     "name": "Vietnam",
     "iso2": "VN",
     "iso3": "VNM"
-  },
-  {
-    "name": "West Bank and Gaza"
   },
   {
     "name": "Zambia",

@@ -5,7 +5,8 @@ const margin = {top: 20, right: 20, bottom: 50, left: 70},
 
 // parse the date / time
 const parseTime = d3.timeParse("%m/%d/%y");
-const formatDateToString = d3.timeFormat("%b %d")
+const formatDateToString = d3.timeFormat("%b %d");
+var countriesToBeCompared = 1;
 
 const colors = {
   "Confirmed": "#FF0000",
@@ -53,6 +54,14 @@ var svgCompareGraph= d3.select('#svgCompareGraph')
   .append("g")
   .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
+
+var svgMultiCountryCompare= d3.select('#svgMultiCompareGraph')
+  .attr("width", width + margin.left + margin.right+ 100)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform",
+    "translate(" + margin.left + "," + margin.top + ")");
+
 
 
 var filterDataByCountry = function(data, country){
@@ -125,10 +134,12 @@ var cleanDataForComparison = function(data){
   return data;
 }
 
-var populateDropdown = function(data){
-  let dropDown = d3.selectAll(".countryDropdown");
+var populateDropdown = function(dropDown){
+  if (dropDown === undefined) {
+    dropDown = d3.selectAll(".countryDropdown");
+  }
   let options = dropDown.selectAll("option")
-    .data(data)
+    .data(countriesData)
     .enter()
     .append("option");
 
@@ -140,7 +151,7 @@ var populateDropdown = function(data){
     });
 }
 
-populateDropdown(countriesData);
+populateDropdown();
 
 var populateData = function(countryISO3){
   d3.json(apiRoot + "/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function(data) {
@@ -517,9 +528,9 @@ var populatePieChart = function(data, svgDiv){
       }
     }); 
 
-    timerid = setTimeout(() => {
-      transitioning = false;
-    }, data.length * delay);
+  timerid = setTimeout(() => {
+    transitioning = false;
+  }, data.length * delay);
 
 
   let path = svg.selectAll('path');
@@ -528,19 +539,19 @@ var populatePieChart = function(data, svgDiv){
     .on('mouseover', function(d){
       if (!transitioning){
         d3.select(this).style("fill", function(d) { return pieHoverColors[d.data.label]; })
-        .attr("stroke","white")
-        .transition("pieHoverOver")
-        .duration(250)
-        .attr("d", arcHover)             
-        .attr("stroke-width",6);
+          .attr("stroke","white")
+          .transition("pieHoverOver")
+          .duration(250)
+          .attr("d", arcHover)             
+          .attr("stroke-width",6);
       }
     })
     .on("mouseleave", function(d) {
-        d3.select(this)
-           .transition("pieHoverLeave")            
-           .duration(250)
-           .attr("d", arc)
-           .attr("stroke","none");
+      d3.select(this)
+        .transition("pieHoverLeave")            
+        .duration(250)
+        .attr("d", arc)
+        .attr("stroke","none");
     })
     .on('mousemove', function(d) {
       let percent = Math.round(1000 * d.data.value / confirmed) / 10;
@@ -583,6 +594,163 @@ var populatePieChart = function(data, svgDiv){
     .attr('x', legendRectSize + legendSpacing)              
     .attr('y', legendRectSize - legendSpacing)              
     .text(function(d) { return d; });                     
+}
+
+//var populateComparisonChart = function() {
+//compareCountries 
+//} 
+
+var compareMultiCountries = function() {
+  let countryURLarray = [];
+  let countryCodeArray = [];
+
+  let c = document.getElementsByClassName('compareCountryDropdown');
+
+  for (i=0; i < c.length; i++){
+    countryURLarray.push(d3.json(apiRoot +"/timeseries?onlyCountries=true&iso3=" + c[i].value));
+    countryCodeArray.push(c[i].value);
+  };
+
+  measure = d3.select('#compareMultiDropdown').node().value; 
+  svgMultiCountryCompare.selectAll("*").remove();
+
+  const colorScheme = d3.scaleOrdinal(d3.schemeSet1)
+    .domain(countryCodeArray);
+
+  Promise.all(countryURLarray).then(function(data) {
+    data = data.map(x => cleanDataForComparison(x[0].timeseries))
+
+    let x = d3.scaleLinear().range([0, width]);
+    let y = d3.scaleLinear().range([height, 0]);
+
+    let valueline = d3.line()
+      .x(function(d) { return x(d.daysPassed); })
+      .y(function(d) { return y(d[measure]); });
+
+
+    let getMaxDaysPassed = (data) => {
+      return d3.max(data, (d) => d.daysPassed)
+    }
+
+
+    let getMaxYValue = (data) => {
+      return d3.max(data, (d) => d[measure])
+    }
+
+    //let maxDaysPassed = 
+    //Math.max(d3.max.apply()
+
+    x.domain([0, Math.max(...data.map(getMaxDaysPassed))]);
+    y.domain([0, Math.max(...data.map(getMaxYValue))]);
+
+    console.log(data);
+
+    // Add the valueline path.
+
+    let path = []
+    for (var i = 0, len = countryCodeArray.length ; i < len; i++) {
+      pathC = svgMultiCountryCompare.append("path")
+        .data([data[i]])
+        .attr("class", "line lineMC" + i)
+        .attr("d", valueline)
+
+      path.push(pathC)
+    }
+
+
+    svgMultiCountryCompare.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).ticks(6));
+
+    svgMultiCountryCompare.append("g")
+      .call(d3.axisLeft(y));
+    //svg.append('text')                                     
+    //.attr('x', 10)              
+    //.attr('y', -5)             
+    //.text('Data taken from Johns Hopkins CSSE'); 
+
+    for (var i = 0, len = countryCodeArray.length ; i < len; i++) {
+      d3.select(".lineMC" + i)
+        .attr("stroke-dasharray", path[i].node().getTotalLength() + " " + path[i].node().getTotalLength() ) 
+        .attr("stroke-dashoffset", path[i].node().getTotalLength())
+        .transition(t)
+        .attr("stroke-dashoffset", 0)
+        .style("stroke", colorScheme(countryCodeArray[i]));
+    }
+
+
+    svgMultiCountryCompare.append("text")             
+      .attr("transform",
+        "translate(" + (width/2) + " ," + 
+        (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .text("Days since first case");
+
+    for (var i = 0, len = countryCodeArray.length ; i < len; i++) {
+      svgMultiCountryCompare.selectAll("dot")	
+        .data(data[i])			
+        .enter().append("circle")								
+        .attr("r", 7)		
+        .attr("cx", function(d) { return x(d.daysPassed ); })		 
+        .attr("cy", function(d) { return y(d[measure]); })		
+        .style("fill", colorScheme(countryCodeArray[i]))
+        .style("opacity", 0)
+        .on("mousemove", function(d) {		
+          d3.select(this)
+            .transition()		
+            .duration(200)
+            .style("opacity", .9);		
+          tooltipDiv.transition()		
+            .duration(200)		
+            .style("opacity", .9);		
+          tooltipDiv.html(
+            //countryCodeArray[i] + " " +
+            formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+            .style("left", (d3.event.pageX) + "px")		
+            .style("top", (d3.event.pageY - 28) + "px");	
+        })					
+        .on("mouseout", function(d) {		
+          d3.select(this)
+            .transition()
+            .duration(500)		
+            .style("opacity", 0);		
+          tooltipDiv.transition()		
+            .duration(500)		
+            .style("opacity", 0);	
+        });
+    };
+
+    let legendRectSize = 18;                                  
+    let legendSpacing = 4;  
+
+    let legend = svgMultiCountryCompare.selectAll('.legend')                     
+      .data(colorScheme.domain())                                   
+      .enter()                                                
+      .append('g')                                            
+      .attr('class', 'legend')                                
+      .attr('transform', function(d, i) {                     
+        return "translate(0," + i * 20 + ")";
+      });                                                     
+
+    legend.append('rect')                                     
+    .attr("x",475)
+    .attr("y",65)
+    .attr("width",18)
+    .attr("height",18)
+      .style('fill', colorScheme)                                   
+      .style('stroke', colorScheme);                                
+
+    legend.append('text')                                     
+    .attr("x",465)
+    .attr("y",73)
+    .attr("dy",".35em")
+    .style("text-anchor","end")
+      .text(function(d) { return d; });                     
+
+  }).catch(function(error){
+    console.log(error);
+    alert("API error");
+  });
 }
 
 var compareCountries = function(){
@@ -725,5 +893,18 @@ var compareCountries = function(){
   }).catch(function(error){
     alert("No data available for Bahamas" );
   });
+}
+
+var addNewCountryDropdown = function(el){
+  countriesToBeCompared++;
+  console.log(countriesToBeCompared)
+
+
+  d3.select(el.parentNode.parentNode).insert('div', '.btnDiv')
+    .attr('class', 'col-md-4')
+    .append('select')
+    .attr('class', 'form-control compareCountryDropdown countryDropdown')
+    .attr('id', 'addCountry' + countriesToBeCompared);
+  populateDropdown(d3.select('#addCountry' + countriesToBeCompared ));
 }
 
