@@ -1,7 +1,7 @@
 const apiRoot = "https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu";
 const margin = {top: 20, right: 20, bottom: 50, left: 70},
-  width = 500 - margin.left - margin.right,
-  height = 360 - margin.top - margin.bottom;
+  width = 800 - margin.left - margin.right,
+  height = 480 - margin.top - margin.bottom;
 
 // parse the date / time
 const parseTime = d3.timeParse("%m/%d/%y");
@@ -220,15 +220,18 @@ var populateLineChart = function(data, svg){
 
   let valueline_confirmed = d3.line()
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.confirmed); });
+    .y(function(d) { return y(d.confirmed); })
+    .curve(d3.curveMonotoneX);
 
   let valueline_deaths = d3.line()
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.deaths); });
+    .y(function(d) { return y(d.deaths); })
+    .curve(d3.curveMonotoneX);
 
   let valueline_recovered = d3.line()
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.recovered); });
+    .y(function(d) { return y(d.recovered); })
+    .curve(d3.curveMonotoneX);
 
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
@@ -251,13 +254,16 @@ var populateLineChart = function(data, svg){
     .attr("class", "line line_r")
     .attr("d", valueline_recovered);
 
-  // Add the x Axis
   svg.append("g")
     .attr("transform", "translate(0," + height + ")")
+    .attr("class", "x.axis")
+    .transition().duration(500)
     .call(d3.axisBottom(x).ticks(6));
 
   // Add the y Axis
   svg.append("g")
+    .attr("class", "y.axis")
+    .transition().duration(500)
     .call(d3.axisLeft(y));
   //svg.append('text')                                     
   //.attr('x', 10)              
@@ -380,7 +386,7 @@ var populateLineChart = function(data, svg){
 
 d3.select('#dailyDropdown').on("change", function () {
   countryISO3 = d3.select('#country').node().value;
-  d3.json("https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function(data) {
+  d3.json(apiRoot + "/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function(data) {
     data = cleanData(data[0].timeseries);
     v = d3.select('#dailyDropdown').node().value;
     populateBarGraph(data, svgBarGraph, v);
@@ -628,7 +634,8 @@ var compareMultiCountries = function() {
 
     let valueline = d3.line()
       .x(function(d) { return x(d.daysPassed); })
-      .y(function(d) { return y(d[measure]); });
+      .y(function(d) { return y(d[measure]); })
+      .curve(d3.curveMonotoneX);
 
 
     let getMaxDaysPassed = (data) => {
@@ -687,7 +694,7 @@ var compareMultiCountries = function() {
         "translate(" + (width/2) + " ," + 
         (height + margin.top + 20) + ")")
       .style("text-anchor", "middle")
-      .text("Days since first case");
+      .text("Days since first case")
 
     for (var i = 0, len = countryCodeArray.length ; i < len; i++) {
       svgMultiCountryCompare.selectAll("dot")	
@@ -760,6 +767,13 @@ var populatePage2CompareData = function(){
   c1iso = d3.select('#country1').node().value; 
   c2iso = d3.select('#country2').node().value; //TODO: If these two are the same
 
+  if (c1iso === c2iso) {
+    alert('Please select two different countries');
+    return ;
+  }
+
+  let xAxisUnit = document.querySelector('input.xAxisInput:checked').value;
+
   Promise.all([
     d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + c1iso),
     d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + c2iso)
@@ -770,11 +784,11 @@ var populatePage2CompareData = function(){
   .catch(function(error){
     console.log(error);
   })
-  compareCountries (svgCompareGraph, c1iso, c2iso);
+  compareCountries(svgCompareGraph, c1iso, c2iso, xAxisUnit);
 
 };
 
-var compareCountries = function(svg, country1iso3, country2iso3){
+var compareCountries = function(svg, country1iso3, country2iso3, xAxisUnit){
   measure = d3.select('#compareDropdown').node().value; 
 
   svg.selectAll("*").remove();
@@ -787,18 +801,28 @@ var compareCountries = function(svg, country1iso3, country2iso3){
     dataCountry1 = cleanDataForComparison(data[0][0].timeseries)
     dataCountry2 = cleanDataForComparison(data[1][0].timeseries)
 
-    let x = d3.scaleLinear().range([0, width]);
+    let x;
+
+    if (xAxisUnit === "date"){
+      x = d3.scaleTime().range([0, width]);
+      x.domain(d3.extent(dataCountry1.concat(dataCountry2), function(d) { return d.date; }));
+    } else {
+      x = d3.scaleLinear().range([0, width]);
+      x.domain([0, Math.max(d3.max(dataCountry1, function(d) { return d[xAxisUnit]; }), d3.max(dataCountry2, function(d) { return d[xAxisUnit]; }))]);
+    }
+
     let y = d3.scaleLinear().range([height, 0]);
 
     let valueline = d3.line()
-      .x(function(d) { return x(d.daysPassed); })
-      .y(function(d) { return y(d[measure]); });
+      .x(function(d) { 
+        //console.log(d[xAxisUnit].toString());
+        return x(d[xAxisUnit]); })
+      .y(function(d) { return y(d[measure]); })
+      .curve(d3.curveMonotoneX);
 
 
     const color10C = d3.scaleOrdinal(d3.schemeCategory10)
 
-    x.domain([0, Math.max(d3.max(dataCountry1, function(d) { return d.daysPassed; }),
-      d3.max(dataCountry2, function(d) { return d.daysPassed; }))]);
 
     y.domain([0, Math.max(d3.max(dataCountry1, function(d) { return Math.max(d[measure]); }),
       d3.max(dataCountry2, function(d) { return Math.max(d[measure]); }))]);
@@ -852,7 +876,7 @@ var compareCountries = function(svg, country1iso3, country2iso3){
       .data(dataCountry1)			
       .enter().append("circle")								
       .attr("r", 7)		
-      .attr("cx", function(d) { return x(d.daysPassed ); })		 
+      .attr("cx", function(d) { return x(d[xAxisUnit]); })		 
       .attr("cy", function(d) { return y(d[measure]); })		
       .style("fill", color10C(country1iso3))
       .style("opacity", 0)
@@ -882,7 +906,7 @@ var compareCountries = function(svg, country1iso3, country2iso3){
       .data(dataCountry2)			
       .enter().append("circle")								
       .attr("r", 7)		
-      .attr("cx", function(d) { return x(d.daysPassed ); })		 
+      .attr("cx", function(d) { return x(d[xAxisUnit] ); })		 
       .attr("cy", function(d) { return y(d[measure]); })		
       .style("fill", color10C(country2iso3))
       .style("opacity", 0)
@@ -910,8 +934,13 @@ var compareCountries = function(svg, country1iso3, country2iso3){
     appendLegend('#svgCompareGraph', color10C )
 
   }).catch(function(error){
-    alert("No data available for Bahamas" );
+    console.log(error);
+    alert(error);
   });
+}
+
+var changeAxis = function (){
+  console.log('Tesst');
 }
 
 var addNewCountryDropdown = function(el){
