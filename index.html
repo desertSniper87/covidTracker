@@ -60,10 +60,18 @@
                                     <select id="country2" class="countryDropdown form-control"></select>
                                   </div>
                                   <div class="row">
-                                    <svg id="svgCompareGraph"></svg>
+                                    <div class="col-md-6" id="svgComparePieChartDiv1">
+                                    </div>
+                                    <div class="col-md-6" id="svgComparePieChartDiv2">
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-md-6">
+                                      <svg id="svgCompareGraph"></svg>
+                                    </div>
                                   </div>
                                 </div>
-                                <button type="button" class="btn btn-primary btn-lg" onclick="compareCountries()">Compare</button>
+                                <button type="button" class="btn btn-primary btn-lg" onclick="populatePage2CompareData()">Compare</button>
                               </div>
                             </div>
                             <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">

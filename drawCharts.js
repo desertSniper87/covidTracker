@@ -48,6 +48,9 @@ var svgBarGraph = d3.select("#svgBarGraph")
     "translate(" + margin.left + "," + margin.top + ")");
 
 var svgPieChartDiv= d3.select('#svgPieChartDiv');
+var svgComparePieChart1 = d3.select('#svgComparePieChartDiv1');
+var svgComparePieChart2 = d3.select('#svgComparePieChartDiv2');
+
 var svgCompareGraph= d3.select('#svgCompareGraph')
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
@@ -753,12 +756,28 @@ var compareMultiCountries = function() {
   });
 }
 
-var compareCountries = function(){
-  country1iso3 = d3.select('#country1').node().value; 
-  country2iso3 = d3.select('#country2').node().value; 
+var populatePage2CompareData = function(){
+  c1iso = d3.select('#country1').node().value; 
+  c2iso = d3.select('#country2').node().value; //TODO: If these two are the same
+
+  Promise.all([
+    d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + c1iso),
+    d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + c2iso)
+  ]).then(function(data) {
+    populatePieChart(data[0][0], svgComparePieChart1);
+    populatePieChart(data[1][0], svgComparePieChart2);
+  })
+  .catch(function(error){
+    console.log(error);
+  })
+  compareCountries (svgCompareGraph, c1iso, c2iso);
+
+};
+
+var compareCountries = function(svg, country1iso3, country2iso3){
   measure = d3.select('#compareDropdown').node().value; 
 
-  svgCompareGraph.selectAll("*").remove();
+  svg.selectAll("*").remove();
 
   Promise.all([
     d3.json(apiRoot + "/timeseries?onlyCountries=true&iso3=" + country1iso3),
@@ -786,22 +805,22 @@ var compareCountries = function(){
 
 
     // Add the valueline path.
-    pathC1 = svgCompareGraph.append("path")
+    pathC1 = svg.append("path")
       .data([dataCountry1])
       .attr("class", "line lineC1")
       .attr("d", valueline)
 
-    pathC2 = svgCompareGraph.append("path")
+    pathC2 = svg.append("path")
       .data([dataCountry2])
       .attr("class", "line lineC2")
       .attr("d", valueline)
 
 
-    svgCompareGraph.append("g")
+    svg.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x).ticks(6));
 
-    svgCompareGraph.append("g")
+    svg.append("g")
       .call(d3.axisLeft(y));
     //svg.append('text')                                     
     //.attr('x', 10)              
@@ -822,14 +841,14 @@ var compareCountries = function(){
       .attr("stroke-dashoffset", 0)
       .style("stroke", color10C(country2iso3));
 
-    svgCompareGraph.append("text")             
+    svg.append("text")             
       .attr("transform",
         "translate(" + (width/2) + " ," + 
         (height + margin.top + 20) + ")")
       .style("text-anchor", "middle")
       .text("Days since first case");
 
-    svgCompareGraph.selectAll("dot")	
+    svg.selectAll("dot")	
       .data(dataCountry1)			
       .enter().append("circle")								
       .attr("r", 7)		
@@ -859,7 +878,7 @@ var compareCountries = function(){
           .style("opacity", 0);	
       });
 
-    svgCompareGraph.selectAll("dot")	
+    svg.selectAll("dot")	
       .data(dataCountry2)			
       .enter().append("circle")								
       .attr("r", 7)		
