@@ -84,13 +84,19 @@
                             <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
                               <div class="form-group">
                                 <div class="row">
-                                  <svg id="svgMultiCompareGraph"></svg>
-                                </div>
-                                <div class="col-md-4 btnDiv">
-                                  <button id="compareMultiCountryBtn" class="btn btn-primary" type="submit" onclick="compareMultiCountries()">Compare</button>
+                                  <div class="col">
+                                    <svg id="svgMultiCompareGraph"></svg>
+                                  </div>
                                 </div>
                                 <div class="row">
-
+                                  <div class="col">
+                                    <svg id="svgMultiCountryGroupGraph"></svg>
+                                  </div>
+                                </div>
+                                <div class="col-md-4 btnDiv">
+                                  <button id="compareMultiCountryBtn" class="btn btn-primary" type="submit" onclick="populatePage3CompareData()">Compare</button>
+                                </div>
+                                <div class="row">
                                   <div class="col-md-4">
                                     <select id="compareMultiDropdown" class="form-control">
                                       <option value="confirmed" selected="selected">Confirmed Cases</option>

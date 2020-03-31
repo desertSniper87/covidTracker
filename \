@@ -740,9 +740,6 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
       })
       .on("mouseout", function(d) {
         d3.select(this).style("fill", color(d.type));
-        tooltipDiv.transition()		
-          .duration(500)		
-          .style("opacity", 0);	
       });
 
     slice.selectAll("rect")

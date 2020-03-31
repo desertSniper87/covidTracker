@@ -20,7 +20,7 @@ body {
 }
 
 circle{
-    padding: 10px;
+    padding: 20px;
 }
 
 div.tooltip {	
@@ -35,6 +35,10 @@ div.tooltip {
     border-radius: 8px;			
     pointer-events: none;			
     display: inline-block;
+}
+
+.cnameaxis > g > text {
+    font-size: 20px;
 }
 
 
