@@ -266,7 +266,6 @@ var populateLineChart = function(data, svg){
     .transition().duration(500)
     .call(d3.axisBottom(x).ticks(6));
 
-  // Add the y Axis
   svg.append("g")
     .attr("class", "y.axis")
     .transition().duration(500)
@@ -276,21 +275,21 @@ var populateLineChart = function(data, svg){
   //.attr('y', -5)             
   //.text('Data taken from Johns Hopkins CSSE'); 
 
-  d3.select(".line_c")
+  let line_c = d3.select(".line_c")
     .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength() ) 
     .attr("stroke-dashoffset", path_c.node().getTotalLength())
     .transition(t)
     .attr("stroke-dashoffset", 0)
     .style("stroke", colors["Confirmed"]);
 
-  d3.select(".line_d")
+  let line_d = d3.select(".line_d")
     .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength() ) 
     .attr("stroke-dashoffset", path_d.node().getTotalLength())
     .transition(t)
     .attr("stroke-dashoffset", 0)
     .style("stroke", colors["Deaths"]);
 
-  d3.select(".line_r")
+  let line_r = d3.select(".line_r")
     .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength() ) 
     .attr("stroke-dashoffset", path_r.node().getTotalLength())
     .transition(t)
@@ -388,6 +387,100 @@ var populateLineChart = function(data, svg){
         .style("opacity", 0);	
     });
 
+
+  let mouseG = svg.append("g")
+    .attr("class", "mouse-over-effects");
+
+  mouseG.append("path") // this is the black vertical line to follow mouse
+    .attr("class", "mouse-line")
+    .style("stroke", "black")
+    .style("stroke-width", "1px")
+    .style("opacity", "0");
+
+  let lines = svg.selectAll('.line').nodes();
+
+  let mouseData = [...data];
+
+  mouseData.forEach((d) => {
+    delete d.NewConfirmed;
+    delete d.NewDeaths;
+    delete d.NewRecovered;
+  })
+
+  var mousePerLine = mouseG.selectAll('.mouse-per-line')
+    .data(mouseData)
+    .enter()
+    .append("g")
+    .attr("class", "mouse-per-line");
+
+  mousePerLine.append("circle")
+    .attr("r", 7)
+    .style("stroke", function(d) {return "black";})
+    .style("fill", "none")
+    .style("stroke-width", "1px")
+    .style("opacity", "0");
+
+  mousePerLine.append("text")
+    .attr("transform", "translate(10,3)");
+
+  mouseG.append('svg:rect') // append a rect to catch mouse movements on canvas
+    .attr('width', width) // can't catch mouse events on a g element
+    .attr('height', height)
+    .attr('fill', 'none')
+    .attr('pointer-events', 'all')
+    .on('mouseout', function() { // on mouse out hide line, circles and text
+      d3.select(".mouse-line")
+        .style("opacity", "0");
+      d3.selectAll(".mouse-per-line circle")
+        .style("opacity", "0");
+      d3.selectAll(".mouse-per-line text")
+        .style("opacity", "0");
+    })
+    .on('mouseover', function() { // on mouse in show line, circles and text
+      d3.select(".mouse-line")
+        .style("opacity", "1");
+      d3.selectAll(".mouse-per-line circle")
+        .style("opacity", "1");
+      d3.selectAll(".mouse-per-line text")
+        .style("opacity", "1");
+    })
+    .on('mousemove', function() { // mouse moving over canvas
+      var mouse = d3.mouse(this);
+      d3.select(".mouse-line")
+        .attr("d", function() {
+          var d = "M" + mouse[0] + "," + height;
+          d += " " + mouse[0] + "," + 0;
+          return d;
+        });
+
+      d3.selectAll(".mouse-per-line")
+        .attr("transform", function(d, i) {
+          var xDate = x.invert(mouse[0]),
+            bisect = d3.bisector(function(d) { return d.date; }).right;
+          idx = bisect(d, xDate);
+
+          console.log(i);
+          var beginning = 0,
+            end = lines[i].getTotalLength(),
+            target = null;
+
+          while (true){
+            target = Math.floor((beginning + end) / 2);
+            pos = lines[i].getPointAtLength(target);
+            if ((target === end || target === beginning) && pos.x !== mouse[0]) {
+              break;
+            }
+            if (pos.x > mouse[0])      end = target;
+            else if (pos.x < mouse[0]) beginning = target;
+            else break; //position found
+          }
+
+          d3.select(this).select('text')
+            .text(y.invert(pos.y).toFixed(2));
+
+          return "translate(" + mouse[0] + "," + pos.y +")";
+        });
+    });
 }
 
 d3.select('#dailyDropdown').on("change", function () {
@@ -662,7 +755,7 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
       });
       d.values.push({
         type: "deaths",
-         value: +data[i][0].deaths
+        value: +data[i][0].deaths
       });
       d.values.push({
         type: "recovered",
@@ -683,8 +776,8 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
     let x1 = d3.scaleBand()
       .domain(domainNames)
       .range([0, x0.bandwidth() - 10]);
-      //.range([0, x0.range()])
-      ;
+    //.range([0, x0.range()])
+    ;
     let y = d3.scaleLinear().range([height, 0])
       .domain([0, d3.max(data, function(country) { return d3.max(country.values, function(d) { return d.value; }); })]);
 
@@ -774,10 +867,10 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
 
     legend.transition().duration(500).delay(function(d,i){ return 1300 + 100 * i; }).style("opacity","1");
 
-}).catch(function(error){
-  console.log(error);
-  alert("API error");
-});
+  }).catch(function(error){
+    console.log(error);
+    alert("API error");
+  });
 }
 
 var compareMultiCountries = function(svg, countryURLarray, countryCodeArray, measure) {
