@@ -53,6 +53,7 @@ var t = d3.transition()
 var svgLineChart = d3.select("#svgLineChart")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
+  .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.left + margin.right}`)
   .append("g")
   .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
@@ -60,6 +61,7 @@ var svgLineChart = d3.select("#svgLineChart")
 var svgBarGraph = d3.select("#svgBarGraph")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
+  .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.left + margin.right}`)
   .append("g")
   .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
@@ -71,6 +73,7 @@ var svgComparePieChart2 = d3.select('#svgComparePieChartDiv2');
 var svgCompareGraph= d3.select('#svgCompareGraph')
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
+  .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.left + margin.right}`)
   .append("g")
   .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
@@ -78,6 +81,7 @@ var svgCompareGraph= d3.select('#svgCompareGraph')
 var svgMultiCountryCompare= d3.select('#svgMultiCompareGraph')
   .attr("width", width + margin.left + margin.right+ 100)
   .attr("height", height + margin.top + margin.bottom)
+  .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.left + margin.right}`)
   .append("g")
   .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
@@ -85,6 +89,7 @@ var svgMultiCountryCompare= d3.select('#svgMultiCompareGraph')
 var svgMultiCountryGroup= d3.select('#svgMultiCountryGroupGraph')
   .attr("width", width + margin.left + margin.right+ 100)
   .attr("height", height + margin.top + margin.bottom)
+  .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.left + margin.right}`)
   .append("g")
   .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
@@ -514,6 +519,7 @@ var populatePieChart = function(data, svgDiv){
   let svg = svgDiv.append('svg')
     .attr('width', width + hoverExtraRadius * 2)
     .attr('height', height + 100 + hoverExtraRadius * 2)
+    .attr("viewBox", `0 0 ${width + hoverExtraRadius * 2} ${height + hoverExtraRadius * 2}`)
     .append('g')
     .attr('transform', 'translate(' + (width / 2 + hoverExtraRadius) + 
       ',' + (height / 2 + hoverExtraRadius) + ')');

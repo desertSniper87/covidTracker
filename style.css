@@ -23,6 +23,11 @@ circle{
     padding: 20px;
 }
 
+svg{
+    width:100%;
+    preserveAspectRatio: "xMidYMid meet";
+}
+
 div.tooltip {	
     position: absolute;			
     text-align: center;			
