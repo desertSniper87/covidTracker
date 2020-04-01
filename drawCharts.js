@@ -8,22 +8,39 @@ const parseTime = d3.timeParse("%m/%d/%y");
 const formatDateToString = d3.timeFormat("%b %d");
 var countriesToBeCompared = 1;
 
+const en2bnDict = {
+  "confirmed": "আক্রান্ত",
+  "deaths": "মৃত",
+  "recovered": "সুস্থ",
+  "NewConfirmed": "দৈনিক নতুন আক্রান্ত",
+  "NewDeaths": "দৈনিক নতুন মৃত",
+  "NewRecovered": "দৈনিক নতুন সুস্থ",
+}
+
+var en2bn = (d) =>  {
+  if (!(d in en2bnDict)) {
+    return iso3tobn[d];
+  } else {
+    return en2bnDict[d];
+  }
+}
+
 const colors = {
-  "Confirmed": "#FF0000",
-  "Deaths": "#000000",
-  "Recovered": "#00FF00",
+  "confirmed": "#FF0000",
+  "deaths": "#000000",
+  "recovered": "#00FF00",
 }
 
 let pieColors = ({
-  "Active Cases": "#F38A32",
-  "Deaths": "#909090",
-  "Recovered": "#59B215",
+  "সর্বমোট চিকিৎসাধীন": "#F38A32",
+  "সর্বমোট মৃত": "#909090",
+  "সর্বমোট সুস্থ": "#59B215",
 })
 
 let pieHoverColors = ({
-  "Active Cases": "#DC6705",
-  "Deaths": "#4F4F4F",
-  "Recovered": "#418210",
+  "সর্বমোট চিকিৎসাধীন": "#DC6705",
+  "সর্বমোট মৃত": "#4F4F4F",
+  "সর্বমোট সুস্থ": "#418210",
 })
 var tooltipDiv = d3.select("body").append("div")	
   .attr("class", "tooltip")				
@@ -193,7 +210,7 @@ var populateData = function(countryISO3){
 };
 
 var appendLegend = function(svgID, legendScale){
-  d3.select('.legend-group').remove();
+  d3.select(svgID).select('.legend-group').remove();
   let group = d3.select(svgID).append("g").attr("class","legend-group");
 
   let legend = group.selectAll(".legend")
@@ -216,7 +233,7 @@ var appendLegend = function(svgID, legendScale){
     .attr("y",73)
     .attr("dy",".35em")
     .style("text-anchor","end")
-    .text(function(d) { return d; });
+    .text(function(d) { return en2bn(d); });
 }
 
 var populateLineChart = function(data, svg){
@@ -281,21 +298,21 @@ var populateLineChart = function(data, svg){
     .attr("stroke-dashoffset", path_c.node().getTotalLength())
     .transition(t)
     .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["Confirmed"]);
+    .style("stroke", colors["confirmed"]);
 
   d3.select(".line_d")
     .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength() ) 
     .attr("stroke-dashoffset", path_d.node().getTotalLength())
     .transition(t)
     .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["Deaths"]);
+    .style("stroke", colors["deaths"]);
 
   d3.select(".line_r")
     .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength() ) 
     .attr("stroke-dashoffset", path_r.node().getTotalLength())
     .transition(t)
     .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["Recovered"]);
+    .style("stroke", colors["recovered"]);
 
   svg.selectAll("dot")	
     .data(data)			
@@ -303,7 +320,7 @@ var populateLineChart = function(data, svg){
     .attr("r", 7)		
     .attr("cx", function(d) { return x(d.date); })		 
     .attr("cy", function(d) { return y(d.confirmed); })		
-    .style("fill", colors["Confirmed"])
+    .style("fill", colors["confirmed"])
     .style("opacity", 0)
     .on("mousemove", function(d) {		
       d3.select(this)
@@ -313,7 +330,7 @@ var populateLineChart = function(data, svg){
       tooltipDiv.transition()		
         .duration(200)		
         .style("opacity", .9);		
-      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.confirmed + " Confirmed")	
+      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.confirmed + " আক্রান্ত")	
         .style("left", (d3.event.pageX) + "px")		
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
@@ -333,7 +350,7 @@ var populateLineChart = function(data, svg){
     .attr("r", 5)		
     .attr("cx", function(d) { return x(d.date); })		 
     .attr("cy", function(d) { return y(d.deaths); })		
-    .style("fill", colors["Deaths"])
+    .style("fill", colors["deaths"])
     .style("opacity", 0)
     .on("mousemove", function(d) {		
       d3.select(this)
@@ -343,7 +360,7 @@ var populateLineChart = function(data, svg){
       tooltipDiv.transition()		
         .duration(200)		
         .style("opacity", .9);		
-      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.deaths + " Deaths")	
+      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.deaths + " মৃত")	
         .style("left", (d3.event.pageX) + "px")		
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
@@ -364,7 +381,7 @@ var populateLineChart = function(data, svg){
     .attr("r", 5)		
     .attr("cx", function(d) { return x(d.date); })		 
     .attr("cy", function(d) { return y(d.recovered); })		
-    .style("fill", colors["Recovered"])
+    .style("fill", colors["recovered"])
     .style("opacity", 0)
     .on("mousemove", function(d) {		
       d3.select(this)
@@ -374,7 +391,7 @@ var populateLineChart = function(data, svg){
       tooltipDiv.transition()		
         .duration(200)		
         .style("opacity", .9);		
-      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.recovered + " Recovered")	
+      tooltipDiv	.html(formatDateToString (d.date) + "<br/>"  + d.recovered + " সুস্থ")	
         .style("left", (d3.event.pageX) + "px")		
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
@@ -432,9 +449,8 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
         .style("opacity", .9);		
       tooltipDiv.html(formatDateToString (d.date) +
         "<br/>"  +
-        d[dailyValue] +
-        " new " +
-        dailyValue.slice(3).toLowerCase())
+        d[dailyValue] +  "<br/>" + 
+        en2bn(dailyValue))
         .style("left", (d3.event.pageX) + "px")		
         .style("top", (d3.event.pageY - 28) + "px");	
     })					
@@ -442,7 +458,7 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
       d3.select(this)
         .transition()
         .duration(500)		
-        .style("fill", colors[dailyValue.slice(3)]);		
+        .style("fill", colors[dailyValue.slice(3).toLowerCase()]);		
       tooltipDiv.transition()		
         .duration(500)		
         .style("opacity", 0);	
@@ -454,7 +470,7 @@ var populateBarGraph = function(data, svg, dailyValue="NewConfirmed"){
     })
     .attr("height", function(d) { 
       return height - y(d[dailyValue]); })
-    .attr("fill", colors[dailyValue.slice(3)]);
+    .attr("fill", colors[dailyValue.slice(3).toLowerCase()]);
 
   let barX = d3.scaleTime().range([0, width]);
   barX .domain(d3.extent(data, function(d) { return d.date; }));
@@ -487,9 +503,9 @@ var populatePieChart = function(data, svgDiv){
 
   let newData = []
   //newData.push({label: 'Confirmed', value: data.confirmed});
-  newData.push({label: 'Active Cases', value: data.confirmed - data.deaths - data.recovered});
-  newData.push({label: 'Deaths', value: data.deaths});
-  newData.push({label: 'Recovered', value: data.recovered});
+  newData.push({label: 'সর্বমোট চিকিৎসাধীন', value: data.confirmed - data.deaths - data.recovered});
+  newData.push({label: 'সর্বমোট মৃত', value: data.deaths});
+  newData.push({label: 'সর্বমোট সুস্থ', value: data.recovered});
 
   let confirmed = data.confirmed;
 
@@ -526,7 +542,7 @@ var populatePieChart = function(data, svgDiv){
       "translate(" + (width/2 - 170) + " ," + 
       (height + margin.top - 150) + ")")
     .style("text-anchor", "middle")
-    .text("Total Confirmed Cases: " + confirmed);
+    .text("সর্বমোট আক্রান্তের সংখ্যা: " + confirmed);
 
   let transitioning = true;
   let delay = 500;
@@ -608,7 +624,7 @@ var populatePieChart = function(data, svgDiv){
   legend.append('text')                                     
     .attr('x', legendRectSize + legendSpacing)              
     .attr('y', legendRectSize - legendSpacing)              
-    .text(function(d) { return d; });                     
+    .text(function(d) { return d ; });                     
 }
 
 //var populateComparisonChart = function() {
@@ -655,6 +671,7 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
       let d = {};
 
       d.country = data[i][0].countryregion;
+      d.nameBN = en2bn(data[i][0].countrycode.iso3);
       d.values = new Array();
       d.values.push({
         type: "confirmed",
@@ -678,12 +695,11 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
     data = newData
 
     let x0 = d3.scaleBand()
-      .domain(data.map(function(d) { return d.country; }))
+      .domain(data.map(function(d) { return d.nameBN; }))
       .range([0, width], .1);
     let x1 = d3.scaleBand()
       .domain(domainNames)
       .range([0, x0.bandwidth() - 10]);
-      //.range([0, x0.range()])
       ;
     let y = d3.scaleLinear().range([height, 0])
       .domain([0, d3.max(data, function(country) { return d3.max(country.values, function(d) { return d.value; }); })]);
@@ -692,9 +708,7 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
       .scale(x0)
       .tickSize(0);
 
-
-    var yAxis = d3.axisLeft()
-      .scale(y);
+    var yAxis = d3.axisLeft().scale(y);
 
     svg.append("g")
       .attr("class", "x axis cnameaxis")
@@ -719,7 +733,7 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
       .data(data)
       .enter().append("g")
       .attr("class", "g")
-      .attr("transform",function(d) { return "translate(" + x0(d.country) + ",0)"; });
+      .attr("transform",function(d) { return "translate(" + x0(d.nameBN) + ",0)"; });
 
     slice.selectAll("rect")
       .data(function(d) { return d.values; })
@@ -734,7 +748,7 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
         tooltipDiv.transition()		
           .duration(200)		
           .style("opacity", .9);		
-        tooltipDiv.html(v.value + ' ' + v.type)
+        tooltipDiv.html(v.value + ' ' + en2bn(v.type))
           .style("left", (d3.event.pageX) + "px")		
           .style("top", (d3.event.pageY - 28) + "px");	
       })
@@ -770,7 +784,7 @@ var compareMultiCountriesLatest = function(svg, countryURLarray, countryCodeArra
       .attr("y", 9)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
-      .text(function(d) {return d.charAt(0).toUpperCase() + d.slice(1); });
+      .text(function(d) {; return en2bn(d); });
 
     legend.transition().duration(500).delay(function(d,i){ return 1300 + 100 * i; }).style("opacity","1");
 
@@ -852,7 +866,7 @@ var compareMultiCountries = function(svg, countryURLarray, countryCodeArray, mea
         "translate(" + (width/2) + " ," + 
         (height + margin.top + 20) + ")")
       .style("text-anchor", "middle")
-      .text("Days since first case")
+      .text("প্রথম নিশ্চিতির পর অতিবাহিত দিন")
 
     for (var i = 0, len = countryCodeArray.length ; i < len; i++) {
       svg.selectAll("dot")	
@@ -873,7 +887,7 @@ var compareMultiCountries = function(svg, countryURLarray, countryCodeArray, mea
             .style("opacity", .9);		
           tooltipDiv.html(
             //countryCodeArray[i] + " " +
-            formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+            formatDateToString (d.date) + "<br/>"  + d[measure] + " " + en2bn(measure))	
             .style("left", (d3.event.pageX) + "px")		
             .style("top", (d3.event.pageY - 28) + "px");	
         })					
@@ -913,7 +927,7 @@ var compareMultiCountries = function(svg, countryURLarray, countryCodeArray, mea
       .attr("y",73)
       .attr("dy",".35em")
       .style("text-anchor","end")
-      .text(function(d) { return d; });                     
+      .text(function(d) { return en2bn(d); });                     
 
   }).catch(function(error){
     console.log(error);
@@ -964,11 +978,11 @@ var compareCountries = function(svg, country1iso3, country2iso3, xAxisUnit){
     if (xAxisUnit === "date"){
       x = d3.scaleTime().range([0, width]);
       x.domain(d3.extent(dataCountry1.concat(dataCountry2), function(d) { return d.date; }));
-      xAxisUnitText = "Date";
+      xAxisUnitText = "ারিখ";
     } else {
       x = d3.scaleLinear().range([0, width]);
       x.domain([0, Math.max(d3.max(dataCountry1, function(d) { return d[xAxisUnit]; }), d3.max(dataCountry2, function(d) { return d[xAxisUnit]; }))]);
-      xAxisUnitText = "Days since first case";
+      xAxisUnitText = "প্রথম নিশ্চিতির পর অতিবাহিত দিন";
     }
 
     let y = d3.scaleLinear().range([height, 0]);
