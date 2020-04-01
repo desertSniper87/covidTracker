@@ -978,7 +978,7 @@ var compareCountries = function(svg, country1iso3, country2iso3, xAxisUnit){
     if (xAxisUnit === "date"){
       x = d3.scaleTime().range([0, width]);
       x.domain(d3.extent(dataCountry1.concat(dataCountry2), function(d) { return d.date; }));
-      xAxisUnitText = "ারিখ";
+      xAxisUnitText = "তারিখ";
     } else {
       x = d3.scaleLinear().range([0, width]);
       x.domain([0, Math.max(d3.max(dataCountry1, function(d) { return d[xAxisUnit]; }), d3.max(dataCountry2, function(d) { return d[xAxisUnit]; }))]);
@@ -1061,7 +1061,7 @@ var compareCountries = function(svg, country1iso3, country2iso3, xAxisUnit){
         tooltipDiv.transition()		
           .duration(200)		
           .style("opacity", .9);		
-        tooltipDiv.html(country1iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+        tooltipDiv.html(en2bn(country1iso3) + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + en2bn(measure))	
           .style("left", (d3.event.pageX) + "px")		
           .style("top", (d3.event.pageY - 28) + "px");	
       })					
@@ -1091,7 +1091,7 @@ var compareCountries = function(svg, country1iso3, country2iso3, xAxisUnit){
         tooltipDiv.transition()		
           .duration(200)		
           .style("opacity", .9);		
-        tooltipDiv.html(country2iso3 + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + measure)	
+        tooltipDiv.html(en2bn(country2iso3) + " " + formatDateToString (d.date) + "<br/>"  + d[measure] + " " + en2bn(measure))	
           .style("left", (d3.event.pageX) + "px")		
           .style("top", (d3.event.pageY - 28) + "px");	
       })					
