@@ -318,52 +318,22 @@ var populateLineChart = function (data, svg) {
   //.attr('y', -5)             
   //.text('Data taken from Johns Hopkins CSSE'); 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  let line_c = d3.select(".line_c")
-    .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength() ) 
-=======
   d3.select(".line_c")
     .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength())
->>>>>>> master
-=======
-  d3.select(".line_c")
-    .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength())
->>>>>>> master
     .attr("stroke-dashoffset", path_c.node().getTotalLength())
     .transition(t)
     .attr("stroke-dashoffset", 0)
     .style("stroke", colors["confirmed"]);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  let line_d = d3.select(".line_d")
-    .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength() ) 
-=======
   d3.select(".line_d")
     .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength())
->>>>>>> master
-=======
-  d3.select(".line_d")
-    .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength())
->>>>>>> master
     .attr("stroke-dashoffset", path_d.node().getTotalLength())
     .transition(t)
     .attr("stroke-dashoffset", 0)
     .style("stroke", colors["deaths"]);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  let line_r = d3.select(".line_r")
-    .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength() ) 
-=======
   d3.select(".line_r")
     .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength())
->>>>>>> master
-=======
-  d3.select(".line_r")
-    .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength())
->>>>>>> master
     .attr("stroke-dashoffset", path_r.node().getTotalLength())
     .transition(t)
     .attr("stroke-dashoffset", 0)
@@ -384,19 +354,11 @@ var populateLineChart = function (data, svg) {
     .on("mousemove", function (d) {
       d3.select(this)
         .transition()
-<<<<<<< HEAD
         .duration(200)
         .style("opacity", .9);
       tooltipDiv.transition()
         .duration(200)
         .style("opacity", .9);
-=======
-        .duration(200)
-        .style("opacity", .9);
-      tooltipDiv.transition()
-        .duration(200)
-        .style("opacity", .9);
->>>>>>> master
       tooltipDiv.html(formatDateToString(d.date) + "<br/>" + d.confirmed + " আক্রান্ত")
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 28) + "px");
@@ -426,19 +388,11 @@ var populateLineChart = function (data, svg) {
     .on("mousemove", function (d) {
       d3.select(this)
         .transition()
-<<<<<<< HEAD
         .duration(200)
         .style("opacity", .9);
       tooltipDiv.transition()
         .duration(200)
         .style("opacity", .9);
-=======
-        .duration(200)
-        .style("opacity", .9);
-      tooltipDiv.transition()
-        .duration(200)
-        .style("opacity", .9);
->>>>>>> master
       tooltipDiv.html(formatDateToString(d.date) + "<br/>" + d.deaths + " মৃত")
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 28) + "px");
@@ -500,16 +454,8 @@ var populateLineChart = function (data, svg) {
 
   let lines = svg.selectAll('.line').nodes();
 
-  let mouseData = [...data];
-
-  mouseData.forEach((d) => {
-    delete d.NewConfirmed;
-    delete d.NewDeaths;
-    delete d.NewRecovered;
-  })
-
   var mousePerLine = mouseG.selectAll('.mouse-per-line')
-    .data(mouseData)
+    .data(data)
     .enter()
     .append("g")
     .attr("class", "mouse-per-line");
@@ -556,11 +502,16 @@ var populateLineChart = function (data, svg) {
 
       d3.selectAll(".mouse-per-line")
         .attr("transform", function(d, i) {
-          var xDate = x.invert(mouse[0]),
+          console.log(i);
+
+          if (i > lines.length -1) {
+            return;
+          }
+          console.log(i);
+          var xDate = xScale.invert(mouse[0]),
             bisect = d3.bisector(function(d) { return d.date; }).right;
           idx = bisect(d, xDate);
 
-          console.log(i);
           var beginning = 0,
             end = lines[i].getTotalLength(),
             target = null;
@@ -577,7 +528,7 @@ var populateLineChart = function (data, svg) {
           }
 
           d3.select(this).select('text')
-            .text(y.invert(pos.y).toFixed(2));
+            .text(yScale.invert(pos.y).toFixed(0));
 
           return "translate(" + mouse[0] + "," + pos.y +")";
         });
@@ -908,19 +859,11 @@ var compareMultiCountriesLatest = function (svg, countryURLarray, countryCodeArr
         return d.nameBN;
       }))
       .range([0, width], .1);
+
     let x1 = d3.scaleBand()
       .domain(domainNames)
-<<<<<<< HEAD
-<<<<<<< HEAD
       .range([0, x0.bandwidth() - 10]);
     //.range([0, x0.range()])
-    ;
-=======
-      .range([0, x0.bandwidth() - 10]);;
->>>>>>> master
-=======
-      .range([0, x0.bandwidth() - 10]);;
->>>>>>> master
     let y = d3.scaleLinear().range([height, 0])
       .domain([0, d3.max(data, function (country) {
         return d3.max(country.values, function (d) {
@@ -1040,16 +983,7 @@ var compareMultiCountriesLatest = function (svg, countryURLarray, countryCodeArr
     legend.transition().duration(500).delay(function (d, i) {
       return 1300 + 100 * i;
     }).style("opacity", "1");
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-  }).catch(function(error){
-=======
   }).catch(function (error) {
->>>>>>> master
-=======
-  }).catch(function (error) {
->>>>>>> master
     console.log(error);
     alert("API error");
   });
