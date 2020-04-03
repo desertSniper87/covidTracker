@@ -319,8 +319,13 @@ var populateLineChart = function (data, svg) {
   //.text('Data taken from Johns Hopkins CSSE'); 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   let line_c = d3.select(".line_c")
     .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength() ) 
+=======
+  d3.select(".line_c")
+    .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength())
+>>>>>>> master
 =======
   d3.select(".line_c")
     .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength())
@@ -331,8 +336,13 @@ var populateLineChart = function (data, svg) {
     .style("stroke", colors["confirmed"]);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   let line_d = d3.select(".line_d")
     .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength() ) 
+=======
+  d3.select(".line_d")
+    .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength())
+>>>>>>> master
 =======
   d3.select(".line_d")
     .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength())
@@ -343,8 +353,13 @@ var populateLineChart = function (data, svg) {
     .style("stroke", colors["deaths"]);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   let line_r = d3.select(".line_r")
     .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength() ) 
+=======
+  d3.select(".line_r")
+    .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength())
+>>>>>>> master
 =======
   d3.select(".line_r")
     .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength())
@@ -369,11 +384,19 @@ var populateLineChart = function (data, svg) {
     .on("mousemove", function (d) {
       d3.select(this)
         .transition()
+<<<<<<< HEAD
         .duration(200)
         .style("opacity", .9);
       tooltipDiv.transition()
         .duration(200)
         .style("opacity", .9);
+=======
+        .duration(200)
+        .style("opacity", .9);
+      tooltipDiv.transition()
+        .duration(200)
+        .style("opacity", .9);
+>>>>>>> master
       tooltipDiv.html(formatDateToString(d.date) + "<br/>" + d.confirmed + " আক্রান্ত")
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 28) + "px");
@@ -403,11 +426,19 @@ var populateLineChart = function (data, svg) {
     .on("mousemove", function (d) {
       d3.select(this)
         .transition()
+<<<<<<< HEAD
         .duration(200)
         .style("opacity", .9);
       tooltipDiv.transition()
         .duration(200)
         .style("opacity", .9);
+=======
+        .duration(200)
+        .style("opacity", .9);
+      tooltipDiv.transition()
+        .duration(200)
+        .style("opacity", .9);
+>>>>>>> master
       tooltipDiv.html(formatDateToString(d.date) + "<br/>" + d.deaths + " মৃত")
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 28) + "px");
@@ -880,9 +911,13 @@ var compareMultiCountriesLatest = function (svg, countryURLarray, countryCodeArr
     let x1 = d3.scaleBand()
       .domain(domainNames)
 <<<<<<< HEAD
+<<<<<<< HEAD
       .range([0, x0.bandwidth() - 10]);
     //.range([0, x0.range()])
     ;
+=======
+      .range([0, x0.bandwidth() - 10]);;
+>>>>>>> master
 =======
       .range([0, x0.bandwidth() - 10]);;
 >>>>>>> master
@@ -1007,7 +1042,11 @@ var compareMultiCountriesLatest = function (svg, countryURLarray, countryCodeArr
     }).style("opacity", "1");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   }).catch(function(error){
+=======
+  }).catch(function (error) {
+>>>>>>> master
 =======
   }).catch(function (error) {
 >>>>>>> master
