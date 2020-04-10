@@ -253,8 +253,7 @@ var populateLineChart = function (data, svg) {
   let xScale = d3.scaleTime().range([0, width]);
   let yScale = d3.scaleLinear().range([height, 0]);
 
-  let valueline_confirmed = d3.line()
-    .x(function (d) {
+  let valueline_confirmed = d3.line().x(function (d) {
       return xScale(d.date);
     })
     .y(function (d) {
@@ -262,8 +261,7 @@ var populateLineChart = function (data, svg) {
     })
     .curve(d3.curveMonotoneX);
 
-  let valueline_deaths = d3.line()
-    .x(function (d) {
+  let valueline_deaths = d3.line().x(function (d) {
       return xScale(d.date);
     })
     .y(function (d) {
@@ -271,8 +269,7 @@ var populateLineChart = function (data, svg) {
     })
     .curve(d3.curveMonotoneX);
 
-  let valueline_recovered = d3.line()
-    .x(function (d) {
+  let valueline_recovered = d3.line().x(function (d) {
       return xScale(d.date);
     })
     .y(function (d) {
@@ -281,11 +278,9 @@ var populateLineChart = function (data, svg) {
     .curve(d3.curveMonotoneX);
 
   xScale.domain(d3.extent(data, function (d) {
-    return d.date;
-  }));
+    return d.date; }));
   yScale.domain([0, d3.max(data, function (d) {
-    return Math.max(d.confirmed, d.recovered, d.deaths)
-  })]);
+    return Math.max(d.confirmed, d.recovered, d.deaths); })]);
 
   // Add the valueline path.
   path_c = svg.append("path")
@@ -343,7 +338,7 @@ var populateLineChart = function (data, svg) {
   svg.selectAll("dot")
     .data(data)
     .enter().append("circle")
-    .attr("r", 7)
+    .attr("r", 3)
     .attr("cx", function (d) {
       return xScale(d.date);
     })
@@ -351,12 +346,7 @@ var populateLineChart = function (data, svg) {
       return yScale(d.confirmed);
     })
     .style("fill", colors["confirmed"])
-    .style("opacity", 0)
     .on("mousemove", function (d) {
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .style("opacity", .9);
       tooltipDiv.transition()
         .duration(200)
         .style("opacity", .9);
@@ -365,10 +355,6 @@ var populateLineChart = function (data, svg) {
         .style("top", (d3.event.pageY - 28) + "px");
     })
     .on("mouseout", function (d) {
-      d3.select(this)
-        .transition()
-        .duration(500)
-        .style("opacity", 0);
       tooltipDiv.transition()
         .duration(500)
         .style("opacity", 0);
@@ -377,7 +363,7 @@ var populateLineChart = function (data, svg) {
   svg.selectAll("dot")
     .data(data)
     .enter().append("circle")
-    .attr("r", 5)
+    .attr("r", 3)
     .attr("cx", function (d) {
       return xScale(d.date);
     })
@@ -385,12 +371,7 @@ var populateLineChart = function (data, svg) {
       return yScale(d.deaths);
     })
     .style("fill", colors["deaths"])
-    .style("opacity", 0)
     .on("mousemove", function (d) {
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .style("opacity", .9);
       tooltipDiv.transition()
         .duration(200)
         .style("opacity", .9);
@@ -399,10 +380,6 @@ var populateLineChart = function (data, svg) {
         .style("top", (d3.event.pageY - 28) + "px");
     })
     .on("mouseout", function (d) {
-      d3.select(this)
-        .transition()
-        .duration(500)
-        .style("opacity", 0);
       tooltipDiv.transition()
         .duration(500)
         .style("opacity", 0);
@@ -412,7 +389,7 @@ var populateLineChart = function (data, svg) {
   svg.selectAll("dot")
     .data(data)
     .enter().append("circle")
-    .attr("r", 5)
+    .attr("r", 3)
     .attr("cx", function (d) {
       return xScale(d.date);
     })
@@ -420,12 +397,7 @@ var populateLineChart = function (data, svg) {
       return yScale(d.recovered);
     })
     .style("fill", colors["recovered"])
-    .style("opacity", 0)
     .on("mousemove", function (d) {
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .style("opacity", .9);
       tooltipDiv.transition()
         .duration(200)
         .style("opacity", .9);
@@ -442,7 +414,6 @@ var populateLineChart = function (data, svg) {
         .duration(500)
         .style("opacity", 0);
     });
-
 }
 
 d3.select('#dailyDropdown').on("change", function () {
@@ -980,7 +951,7 @@ var compareMultiCountries = function (svg, countryURLarray, countryCodeArray, me
       svg.selectAll("dot")
         .data(data[i])
         .enter().append("circle")
-        .attr("r", 7)
+        .attr("r", 3)
         .attr("cx", function (d) {
           return x(d.daysPassed);
         })
@@ -988,12 +959,7 @@ var compareMultiCountries = function (svg, countryURLarray, countryCodeArray, me
           return y(d[measure]);
         })
         .style("fill", colorScheme(countryCodeArray[i]))
-        .style("opacity", 0)
         .on("mousemove", function (d) {
-          d3.select(this)
-            .transition()
-            .duration(200)
-            .style("opacity", .9);
           tooltipDiv.transition()
             .duration(200)
             .style("opacity", .9);
@@ -1004,18 +970,11 @@ var compareMultiCountries = function (svg, countryURLarray, countryCodeArray, me
             .style("top", (d3.event.pageY - 28) + "px");
         })
         .on("mouseout", function (d) {
-          d3.select(this)
-            .transition()
-            .duration(500)
-            .style("opacity", 0);
           tooltipDiv.transition()
             .duration(500)
             .style("opacity", 0);
         });
     };
-
-    let legendRectSize = 18;
-    let legendSpacing = 4;
 
     let legend = svg.selectAll('.legend')
       .data(colorScheme.domain())
@@ -1175,7 +1134,7 @@ var compareCountries = function (svg, country1iso3, country2iso3, xAxisUnit) {
     svg.selectAll("dot")
       .data(dataCountry1)
       .enter().append("circle")
-      .attr("r", 7)
+      .attr("r", 3)
       .attr("cx", function (d) {
         return x(d[xAxisUnit]);
       })
@@ -1183,12 +1142,7 @@ var compareCountries = function (svg, country1iso3, country2iso3, xAxisUnit) {
         return y(d[measure]);
       })
       .style("fill", color10C(country1iso3))
-      .style("opacity", 0)
       .on("mousemove", function (d) {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style("opacity", .9);
         tooltipDiv.transition()
           .duration(200)
           .style("opacity", .9);
@@ -1197,10 +1151,6 @@ var compareCountries = function (svg, country1iso3, country2iso3, xAxisUnit) {
           .style("top", (d3.event.pageY - 28) + "px");
       })
       .on("mouseout", function (d) {
-        d3.select(this)
-          .transition()
-          .duration(500)
-          .style("opacity", 0);
         tooltipDiv.transition()
           .duration(500)
           .style("opacity", 0);
@@ -1209,7 +1159,7 @@ var compareCountries = function (svg, country1iso3, country2iso3, xAxisUnit) {
     svg.selectAll("dot")
       .data(dataCountry2)
       .enter().append("circle")
-      .attr("r", 7)
+      .attr("r", 3)
       .attr("cx", function (d) {
         return x(d[xAxisUnit]);
       })
@@ -1217,12 +1167,7 @@ var compareCountries = function (svg, country1iso3, country2iso3, xAxisUnit) {
         return y(d[measure]);
       })
       .style("fill", color10C(country2iso3))
-      .style("opacity", 0)
       .on("mousemove", function (d) {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style("opacity", .9);
         tooltipDiv.transition()
           .duration(200)
           .style("opacity", .9);
@@ -1231,10 +1176,6 @@ var compareCountries = function (svg, country1iso3, country2iso3, xAxisUnit) {
           .style("top", (d3.event.pageY - 28) + "px");
       })
       .on("mouseout", function (d) {
-        d3.select(this)
-          .transition()
-          .duration(500)
-          .style("opacity", 0);
         tooltipDiv.transition()
           .duration(500)
           .style("opacity", 0);
