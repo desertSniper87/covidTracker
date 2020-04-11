@@ -403,13 +403,13 @@ var populateLineChart = function (data, svg) {
         .style("opacity", 0);
     });
 
-  let circleC = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5),
-  circleR = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5),
-  circleD = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5);
+  let circleC = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
+  circleR = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
+  circleD = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL");
 
-  let lineC = svg.append('line').attr("class", "chartPointingLineC").attr("stroke-width", 3),
-    lineD = svg.append('line').attr("class", "chartPointingLineD").attr("stroke-width", 3),
-    lineR = svg.append('line').attr("class", "chartPointingLineR").attr("stroke-width", 3);
+  let lineC = svg.append('line').attr("class", "chartPointingLineC cPL").attr("stroke-width", 3),
+    lineD = svg.append('line').attr("class", "chartPointingLineD cPL").attr("stroke-width", 3),
+    lineR = svg.append('line').attr("class", "chartPointingLineR cPL").attr("stroke-width", 3);
 
 
   let mousemoved = function (data) {
@@ -421,14 +421,15 @@ var populateLineChart = function (data, svg) {
       let d = data[idx];
       tooltipDiv.transition()
         .duration(200)
-        .style("opacity", .9);
-      tooltipDiv.html(`${formatDateToString(d.date)} "<br/>
-      <font color="${colors.confirmed}">${d.confirmed}জন আক্রান্ত</font><br/>
-      <font color="${colors.deaths}">${d.deaths}জন মৃত</font><br/>
-      <font color="${colors.recovered}">${d.recovered}জন সুস্থ</font><br/>`)
+        .style("opacity", 1);
+      tooltipDiv.html(`${formatDateToString(d.date)} <br/>
+      <font color="${d3.rgb(colors.confirmed).darker(2).formatHex()}">${d.confirmed} জন আক্রান্ত</font><br/>
+      <font color="${d3.rgb(colors.deaths).darker(2).formatHex()}">${d.deaths} জন মৃত</font><br/>
+      <font color="${d3.rgb(colors.recovered).darker(2).formatHex()}">${d.recovered} জন সুস্থ</font><br/>`)
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 28) + "px");
 
+    d3.selectAll('.cPL').style("opacity", .8);
 
     let p = {};
     ['.line_c', '.line_r', '.line_d'].forEach((l) => {
@@ -473,7 +474,7 @@ var populateLineChart = function (data, svg) {
 
     // linear scan for coarse approximation
     for (var scan, scanLength = 0, scanDistance; scanLength <= pathLength; scanLength += precision) {
-      if ((scanDistance = distance2(scan = pathNode.getPointAtLength(scanLength))) < bestDistance) {
+      if ((scanDistance = xDistance(scan = pathNode.getPointAtLength(scanLength))) < bestDistance) {
         best = scan, bestLength = scanLength, bestDistance = scanDistance;
       }
     }
@@ -486,9 +487,9 @@ var populateLineChart = function (data, svg) {
         afterLength,
         beforeDistance,
         afterDistance;
-      if ((beforeLength = bestLength - precision) >= 0 && (beforeDistance = distance2(before = pathNode.getPointAtLength(beforeLength))) < bestDistance) {
+      if ((beforeLength = bestLength - precision) >= 0 && (beforeDistance = xDistance(before = pathNode.getPointAtLength(beforeLength))) < bestDistance) {
         best = before, bestLength = beforeLength, bestDistance = beforeDistance;
-      } else if ((afterLength = bestLength + precision) <= pathLength && (afterDistance = distance2(after = pathNode.getPointAtLength(afterLength))) < bestDistance) {
+      } else if ((afterLength = bestLength + precision) <= pathLength && (afterDistance = xDistance(after = pathNode.getPointAtLength(afterLength))) < bestDistance) {
         best = after, bestLength = afterLength, bestDistance = afterDistance;
       } else {
         precision /= 2;
@@ -499,10 +500,9 @@ var populateLineChart = function (data, svg) {
     best.distance = Math.sqrt(bestDistance);
     return best;
 
-    function distance2(p) {
-      var dx = p.x - point[0],
-        dy = p.y - point[1];
-      return dx * dx + dy * dy;
+    function xDistance(p) {
+      var dx = p.x - point[0];
+      return dx * dx;
     }
   }
 
@@ -520,6 +520,9 @@ var populateLineChart = function (data, svg) {
       tooltipDiv.transition()
         .duration(500)
         .style("opacity", 0);
+
+      d3.selectAll('.cPL').transition()
+        .duration(500).style("opacity", 0);
     });
 
 }
