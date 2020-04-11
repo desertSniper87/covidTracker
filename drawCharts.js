@@ -274,10 +274,8 @@ var populateLineChart = function (data, svg) {
     .y(function (d) { return yScale(d.recovered); })
     .curve(d3.curveMonotoneX);
 
-  xScale.domain(d3.extent(data, function (d) {
-    return d.date; }));
-  yScale.domain([0, d3.max(data, function (d) {
-    return Math.max(d.confirmed, d.recovered, d.deaths); })]);
+  xScale.domain(d3.extent(data, function (d) { return d.date; }));
+  yScale.domain([0, d3.max(data, function (d) { return Math.max(d.confirmed, d.recovered, d.deaths); })]);
 
   // Add the valueline path.
   path_c = svg.append("path")
@@ -342,20 +340,7 @@ var populateLineChart = function (data, svg) {
     .attr("cy", function (d) {
       return yScale(d.confirmed);
     })
-    .style("fill", colors["confirmed"])
-    .on("mousemove", function (d) {
-      tooltipDiv.transition()
-        .duration(200)
-        .style("opacity", .9);
-      tooltipDiv.html(formatDateToString(d.date) + "<br/>" + d.confirmed + " আক্রান্ত")
-        .style("left", (d3.event.pageX) + "px")
-        .style("top", (d3.event.pageY - 28) + "px");
-    })
-    .on("mouseout", function (d) {
-      tooltipDiv.transition()
-        .duration(500)
-        .style("opacity", 0);
-    });
+    .style("fill", colors["confirmed"]);
 
   svg.selectAll("dot")
     .data(data)
@@ -367,17 +352,7 @@ var populateLineChart = function (data, svg) {
     .attr("cy", function (d) {
       return yScale(d.deaths);
     })
-    .style("fill", colors["deaths"])
-    .on("mousemove", function (d) {
-      tooltipDiv.transition()
-        .duration(200)
-        .style("opacity", .9);
-      tooltipDiv.html(formatDateToString(d.date) + "<br/>" + d.deaths + " মৃত")
-        .style("left", (d3.event.pageX) + "px")
-        .style("top", (d3.event.pageY - 28) + "px");
-    })
-    .on("mouseout", function (d) {
-    });
+    .style("fill", colors["deaths"]);
 
 
   svg.selectAll("dot")
@@ -390,18 +365,7 @@ var populateLineChart = function (data, svg) {
     .attr("cy", function (d) {
       return yScale(d.recovered);
     })
-    .style("fill", colors["recovered"])
-    .on("mousemove", function (d) {
-    })
-    .on("mouseout", function (d) {
-      d3.select(this)
-        .transition()
-        .duration(500)
-        .style("opacity", 0);
-      tooltipDiv.transition()
-        .duration(500)
-        .style("opacity", 0);
-    });
+    .style("fill", colors["recovered"]);
 
   let circleC = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
   circleR = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
