@@ -269,12 +269,9 @@ var populateLineChart = function (data, svg) {
     })
     .curve(d3.curveMonotoneX);
 
-  let valueline_recovered = d3.line().x(function (d) {
-      return xScale(d.date);
-    })
-    .y(function (d) {
-      return yScale(d.recovered);
-    })
+  let valueline_recovered = d3.line()
+    .x(function (d) { return xScale(d.date); })
+    .y(function (d) { return yScale(d.recovered); })
     .curve(d3.curveMonotoneX);
 
   xScale.domain(d3.extent(data, function (d) {
@@ -380,9 +377,6 @@ var populateLineChart = function (data, svg) {
         .style("top", (d3.event.pageY - 28) + "px");
     })
     .on("mouseout", function (d) {
-      tooltipDiv.transition()
-        .duration(500)
-        .style("opacity", 0);
     });
 
 
@@ -398,12 +392,6 @@ var populateLineChart = function (data, svg) {
     })
     .style("fill", colors["recovered"])
     .on("mousemove", function (d) {
-      tooltipDiv.transition()
-        .duration(200)
-        .style("opacity", .9);
-      tooltipDiv.html(formatDateToString(d.date) + "<br/>" + d.recovered + " সুস্থ")
-        .style("left", (d3.event.pageX) + "px")
-        .style("top", (d3.event.pageY - 28) + "px");
     })
     .on("mouseout", function (d) {
       d3.select(this)
@@ -414,15 +402,135 @@ var populateLineChart = function (data, svg) {
         .duration(500)
         .style("opacity", 0);
     });
+
+  let circleC = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5),
+  circleR = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5),
+  circleD = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5);
+
+  let lineC = svg.append('line').attr("class", "chartPointingLineC").attr("stroke-width", 3),
+    lineD = svg.append('line').attr("class", "chartPointingLineD").attr("stroke-width", 3),
+    lineR = svg.append('line').attr("class", "chartPointingLineR").attr("stroke-width", 3);
+
+
+  let mousemoved = function (data) {
+    // let path = svg.select('line');
+    let m = d3.mouse(this),
+      xDate = xScale.invert(m[0]),
+      bisect = d3.bisector(function (d) { return d.date; }).right,
+      idx = bisect(data, xDate);
+      let d = data[idx];
+      tooltipDiv.transition()
+        .duration(200)
+        .style("opacity", .9);
+      tooltipDiv.html(`${formatDateToString(d.date)} "<br/>
+      <font color="${colors.confirmed}">${d.confirmed}জন আক্রান্ত</font><br/>
+      <font color="${colors.deaths}">${d.deaths}জন মৃত</font><br/>
+      <font color="${colors.recovered}">${d.recovered}জন সুস্থ</font><br/>`)
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+
+
+    let p = {};
+    ['.line_c', '.line_r', '.line_d'].forEach((l) => {
+      p[l] = closestPoint(svg.select(l).node(), m);
+    });
+
+    Object.keys(p).forEach((k) => {
+      if (k === '.line_c') {
+        lineC.attr("x1", p[k][0])
+          .attr("y1", p[k][1])
+          .attr("x2", m[0])
+          .attr("y2", m[1])
+          .style("stroke", colors["confirmed"]);
+        circleC.attr("cx", p[k][0]).attr("cy", p[k][1])
+          .style("fill", colors["confirmed"]);
+      } else if (k === '.line_d') {
+        lineD.attr("x1", p[k][0])
+          .attr("y1", p[k][1])
+          .attr("x2", m[0])
+          .attr("y2", m[1])
+          .style("stroke", colors["deaths"]);
+        circleD.attr("cx", p[k][0]).attr("cy", p[k][1])
+          .style("fill", colors["deaths"]);
+      } else if (k === '.line_r') {
+        lineR.attr("x1", p[k][0])
+          .attr("y1", p[k][1])
+          .attr("x2", m[0])
+          .attr("y2", m[1])
+          .style("stroke", colors["recovered"]);
+        circleR.attr("cx", p[k][0]).attr("cy", p[k][1])
+          .style("fill", colors["recovered"]);
+      }
+    });
+  }
+
+  let closestPoint = function (pathNode, point) {
+    var pathLength = pathNode.getTotalLength(),
+      precision = 8,
+      best,
+      bestLength,
+      bestDistance = Infinity;
+
+    // linear scan for coarse approximation
+    for (var scan, scanLength = 0, scanDistance; scanLength <= pathLength; scanLength += precision) {
+      if ((scanDistance = distance2(scan = pathNode.getPointAtLength(scanLength))) < bestDistance) {
+        best = scan, bestLength = scanLength, bestDistance = scanDistance;
+      }
+    }
+    // binary search for precise estimate
+    precision /= 2;
+    while (precision > 0.5) {
+      var before,
+        after,
+        beforeLength,
+        afterLength,
+        beforeDistance,
+        afterDistance;
+      if ((beforeLength = bestLength - precision) >= 0 && (beforeDistance = distance2(before = pathNode.getPointAtLength(beforeLength))) < bestDistance) {
+        best = before, bestLength = beforeLength, bestDistance = beforeDistance;
+      } else if ((afterLength = bestLength + precision) <= pathLength && (afterDistance = distance2(after = pathNode.getPointAtLength(afterLength))) < bestDistance) {
+        best = after, bestLength = afterLength, bestDistance = afterDistance;
+      } else {
+        precision /= 2;
+      }
+    }
+
+    best = [best.x, best.y];
+    best.distance = Math.sqrt(bestDistance);
+    return best;
+
+    function distance2(p) {
+      var dx = p.x - point[0],
+        dy = p.y - point[1];
+      return dx * dx + dy * dy;
+    }
+  }
+
+  let mouseG = svg.append("g")
+    .attr("class", "mouse-over-effects");
+
+  mouseG.append('svg:rect')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('fill', 'none')
+    .attr('pointer-events', 'all')
+    .data([data])
+    .on("mousemove", mousemoved)
+    .on("mouseout", () => {
+      tooltipDiv.transition()
+        .duration(500)
+        .style("opacity", 0);
+    });
+
 }
 
 d3.select('#dailyDropdown').on("change", function () {
   countryISO3 = d3.select('#country').node().value;
   d3.json(apiRoot + "/timeseries?onlyCountries=true&iso3=" + countryISO3).then(function (data) {
-      data = cleanData(data[0].timeseries);
-      v = d3.select('#dailyDropdown').node().value;
-      populateBarGraph(data, svgBarGraph, v);
-    })
+    data = cleanData(data[0].timeseries);
+    v = d3.select('#dailyDropdown').node().value;
+    populateBarGraph(data, svgBarGraph, v);
+  })
     .catch(function (error) {
       console.log(error);
     })
@@ -465,9 +573,9 @@ var populateBarGraph = function (data, svg, dailyValue = "NewConfirmed") {
         .duration(200)
         .style("opacity", .9);
       tooltipDiv.html(formatDateToString(d.date) +
-          "<br/>" +
-          d[dailyValue] + "<br/>" +
-          en2bn(dailyValue))
+        "<br/>" +
+        d[dailyValue] + "<br/>" +
+        en2bn(dailyValue))
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 28) + "px");
     })
@@ -605,8 +713,8 @@ var populatePieChart = function (data, svgDiv) {
     .on('mouseover', function (d) {
       if (!transitioning) {
         d3.select(this).style("fill", function (d) {
-            return pieHoverColors[d.data.label];
-          })
+          return pieHoverColors[d.data.label];
+        })
           .attr("stroke", "white")
           .transition("pieHoverOver")
           .duration(250)
@@ -882,12 +990,8 @@ var compareMultiCountries = function (svg, countryURLarray, countryCodeArray, me
     let y = d3.scaleLinear().range([height, 0]);
 
     let valueline = d3.line()
-      .x(function (d) {
-        return x(d.daysPassed);
-      })
-      .y(function (d) {
-        return y(d[measure]);
-      })
+      .x(function (d) { return x(d.daysPassed); })
+      .y(function (d) { return y(d[measure]); })
       .curve(d3.curveMonotoneX);
 
 
@@ -964,8 +1068,8 @@ var compareMultiCountries = function (svg, countryURLarray, countryCodeArray, me
             .duration(200)
             .style("opacity", .9);
           tooltipDiv.html(
-              //countryCodeArray[i] + " " +
-              formatDateToString(d.date) + "<br/>" + d[measure] + " " + en2bn(measure))
+            //countryCodeArray[i] + " " +
+            formatDateToString(d.date) + "<br/>" + d[measure] + " " + en2bn(measure))
             .style("left", (d3.event.pageX) + "px")
             .style("top", (d3.event.pageY - 28) + "px");
         })
@@ -1020,12 +1124,12 @@ var populatePage2CompareData = function () {
   let xAxisUnit = document.querySelector('input.xAxisInput:checked').value;
 
   Promise.all([
-      d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + c1iso),
-      d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + c2iso)
-    ]).then(function (data) {
-      populatePieChart(data[0][0], svgComparePieChart1);
-      populatePieChart(data[1][0], svgComparePieChart2);
-    })
+    d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + c1iso),
+    d3.json(apiRoot + "/latest?onlyCountries=true&iso3=" + c2iso)
+  ]).then(function (data) {
+    populatePieChart(data[0][0], svgComparePieChart1);
+    populatePieChart(data[1][0], svgComparePieChart2);
+  })
     .catch(function (error) {
       console.log(error);
     })
@@ -1080,8 +1184,8 @@ var compareCountries = function (svg, country1iso3, country2iso3, xAxisUnit) {
 
 
     y.domain([0, Math.max(d3.max(dataCountry1, function (d) {
-        return Math.max(d[measure]);
-      }),
+      return Math.max(d[measure]);
+    }),
       d3.max(dataCountry2, function (d) {
         return Math.max(d[measure]);
       }))]);
