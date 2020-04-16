@@ -371,10 +371,6 @@ var populateLineChart = function (data, svg) {
   circleR = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
   circleD = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL");
 
-  let lineC = svg.append('line').attr("class", "chartPointingLineC cPL").attr("stroke-width", 3),
-    lineD = svg.append('line').attr("class", "chartPointingLineD cPL").attr("stroke-width", 3),
-    lineR = svg.append('line').attr("class", "chartPointingLineR cPL").attr("stroke-width", 3);
-
 
   let mousemoved = function (data) {
     // let path = svg.select('line');
@@ -392,86 +388,8 @@ var populateLineChart = function (data, svg) {
       <font color="${d3.rgb(colors.recovered).darker(2).formatHex()}">${d.recovered} জন সুস্থ</font><br/>`)
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 28) + "px");
-
-    d3.selectAll('.cPL').style("opacity", .8);
-
-    let p = {};
-    ['.line_c', '.line_r', '.line_d'].forEach((l) => {
-      p[l] = closestPoint(svg.select(l).node(), m);
-    });
-
-    Object.keys(p).forEach((k) => {
-      if (k === '.line_c') {
-        lineC.attr("x1", p[k][0])
-          .attr("y1", p[k][1])
-          .attr("x2", m[0])
-          .attr("y2", m[1])
-          .style("stroke", colors["confirmed"]);
-        circleC.attr("cx", p[k][0]).attr("cy", p[k][1])
-          .style("fill", colors["confirmed"]);
-      } else if (k === '.line_d') {
-        lineD.attr("x1", p[k][0])
-          .attr("y1", p[k][1])
-          .attr("x2", m[0])
-          .attr("y2", m[1])
-          .style("stroke", colors["deaths"]);
-        circleD.attr("cx", p[k][0]).attr("cy", p[k][1])
-          .style("fill", colors["deaths"]);
-      } else if (k === '.line_r') {
-        lineR.attr("x1", p[k][0])
-          .attr("y1", p[k][1])
-          .attr("x2", m[0])
-          .attr("y2", m[1])
-          .style("stroke", colors["recovered"]);
-        circleR.attr("cx", p[k][0]).attr("cy", p[k][1])
-          .style("fill", colors["recovered"]);
-      }
-    });
   }
 
-  let closestPoint = function (pathNode, point) {
-    var pathLength = pathNode.getTotalLength(),
-      precision = 8,
-      best,
-      bestLength,
-      bestDistance = Infinity;
-
-    // linear scan for coarse approximation
-    for (var scan, scanLength = 0, scanDistance; scanLength <= pathLength; scanLength += precision) {
-      if ((scanDistance = xDistance(scan = pathNode.getPointAtLength(scanLength))) < bestDistance) {
-        best = scan, bestLength = scanLength, bestDistance = scanDistance;
-      }
-    }
-    // binary search for precise estimate
-    precision /= 2;
-    while (precision > 0.5) {
-      var before,
-        after,
-        beforeLength,
-        afterLength,
-        beforeDistance,
-        afterDistance;
-      if ((beforeLength = bestLength - precision) >= 0 && (beforeDistance = xDistance(before = pathNode.getPointAtLength(beforeLength))) < bestDistance) {
-        best = before, bestLength = beforeLength, bestDistance = beforeDistance;
-      } else if ((afterLength = bestLength + precision) <= pathLength && (afterDistance = xDistance(after = pathNode.getPointAtLength(afterLength))) < bestDistance) {
-        best = after, bestLength = afterLength, bestDistance = afterDistance;
-      } else {
-        precision /= 2;
-      }
-    }
-
-    best = [best.x, best.y];
-    best.distance = Math.sqrt(bestDistance);
-    return best;
-
-    function xDistance(p) {
-      var dx = p.x - point[0];
-      return dx * dx;
-    }
-  }
-
-  let mouseG = svg.append("g")
-    .attr("class", "mouse-over-effects");
 
   mouseG.append('svg:rect')
     .attr('width', width)
