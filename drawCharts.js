@@ -371,6 +371,9 @@ var populateLineChart = function (data, svg) {
   circleR = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
   circleD = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL");
 
+  let getPointAtXaxis = function (xScale, yScale, d, line_type) {
+    return [xScale(d.date), yScale(d[line_type])];
+  }
 
   let mousemoved = function (data) {
     // let path = svg.select('line');
@@ -378,18 +381,45 @@ var populateLineChart = function (data, svg) {
       xDate = xScale.invert(m[0]),
       bisect = d3.bisector(function (d) { return d.date; }).right,
       idx = bisect(data, xDate);
-      let d = data[idx];
-      tooltipDiv.transition()
-        .duration(200)
-        .style("opacity", 1);
-      tooltipDiv.html(`${formatDateToString(d.date)} <br/>
+    let d = data[idx];
+    tooltipDiv.transition()
+      .duration(200)
+      .style("opacity", 1);
+    tooltipDiv.html(`${formatDateToString(d.date)} <br/>
       <font color="${d3.rgb(colors.confirmed).darker(2).formatHex()}">${d.confirmed} জন আক্রান্ত</font><br/>
       <font color="${d3.rgb(colors.deaths).darker(2).formatHex()}">${d.deaths} জন মৃত</font><br/>
       <font color="${d3.rgb(colors.recovered).darker(2).formatHex()}">${d.recovered} জন সুস্থ</font><br/>`)
-        .style("left", (d3.event.pageX) + "px")
-        .style("top", (d3.event.pageY - 28) + "px");
+      .style("left", (d3.event.pageX) + "px")
+      .style("top", (d3.event.pageY - 28) + "px");
+
+    d3.selectAll('.cPL').style("opacity", .8);
+
+    let p = {};
+    [
+      ['.line_c', 'confirmed'],
+      ['.line_d', 'recovered'],
+      ['.line_r', 'deaths']
+    ].forEach((l) => {
+      let line = svg.select(l[0]);
+      p[l[1]] = getPointAtXaxis(line.node(), m, d3.event, idx, yScale, d, l[1], xScale);
+    });
+
+    Object.keys(p).forEach((k) => {
+      if (k === 'confirmed') {
+        circleC.attr("cx", p[k][0]).attr("cy", p[k][1])
+          .style("fill", colors[k]);
+      } else if (k === 'deaths') {
+        circleD.attr("cx", p[k][0]).attr("cy", p[k][1])
+          .style("fill", colors[k]);
+      } else if (k === 'recovered') {
+        circleR.attr("cx", p[k][0]).attr("cy", p[k][1])
+          .style("fill", colors[k]);
+      }
+    });
   }
 
+  let mouseG = svg.append("g")
+    .attr("class", "mouse-over-effects");
 
   mouseG.append('svg:rect')
     .attr('width', width)
