@@ -400,8 +400,8 @@ var populateLineChart = function (data, svg) {
       ['.line_d', 'recovered'],
       ['.line_r', 'deaths']
     ].forEach((l) => {
-      let line = svg.select(l[0]);
-      p[l[1]] = getPointAtXaxis(line.node(), m, d3.event, idx, yScale, d, l[1], xScale);
+      // let line = svg.select(l[0]);
+      p[l[1]] = getPointAtXaxis(xScale, yScale, d, l[1]);
     });
 
     Object.keys(p).forEach((k) => {
