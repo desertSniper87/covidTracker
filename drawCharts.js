@@ -375,8 +375,10 @@ var populateLineChart = function (data, svg) {
     return [xScale(d.date), yScale(d[line_type])];
   }
 
+  let drawLine = function(mouse) {
+  }
+
   let mousemoved = function (data) {
-    // let path = svg.select('line');
     let m = d3.mouse(this),
       xDate = xScale.invert(m[0]),
       bisect = d3.bisector(function (d) { return d.date; }).right,
@@ -392,7 +394,9 @@ var populateLineChart = function (data, svg) {
       .style("left", (d3.event.pageX) + "px")
       .style("top", (d3.event.pageY - 28) + "px");
 
+
     d3.selectAll('.cPL').style("opacity", .8);
+
 
     let p = {};
     [
@@ -402,6 +406,14 @@ var populateLineChart = function (data, svg) {
     ].forEach((l) => {
       // let line = svg.select(l[0]);
       p[l[1]] = getPointAtXaxis(xScale, yScale, d, l[1]);
+    });
+
+  d3.select(".mouse-line")
+    .attr("d", function () {
+      let vLineData = "M" + xScale(d.date) + "," + Math.min.apply(null, Object.values(p).map(a => a[1]));
+      vLineData += " " + xScale(d.date) + "," + height;
+      console.log(vLineData);
+      return vLineData;
     });
 
     Object.keys(p).forEach((k) => {
@@ -418,8 +430,16 @@ var populateLineChart = function (data, svg) {
     });
   }
 
+
   let mouseG = svg.append("g")
     .attr("class", "mouse-over-effects");
+
+  mouseG.append("path")
+    .attr("class", "mouse-line")
+    .style("stroke", "black")
+    .style("stroke-width", "1px")
+    .style("opacity", "0");
+
 
   mouseG.append('svg:rect')
     .attr('width', width)
@@ -435,6 +455,10 @@ var populateLineChart = function (data, svg) {
 
       d3.selectAll('.cPL').transition()
         .duration(500).style("opacity", 0);
+    })
+    .on("mouseover", () => {
+      d3.select('.mouse-line').style("opacity", "1");
+
     });
 
 }
