@@ -46,6 +46,10 @@ div.tooltip {
     font-size: 20px;
 }
 
+.legend-hidden {
+    opacity: 0.3;
+}
+
 
 /*====================
  *

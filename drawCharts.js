@@ -221,14 +221,17 @@ var populateData = function (countryISO3) {
 };
 
 var appendLegend = function (svgID, legendScale, position='bottom') {
-  d3.select(svgID).select('.legend-group').remove();
-  let group = d3.select(svgID).append("g").attr("class", "legend-group");
+  svg = d3.select(svgID);
+  svg.select('.legend-group').remove();
+  let group = svg.append("g").attr("class", "legend-group");
 
   let legend = group.selectAll(".legend")
     .data(legendScale.domain().slice())
     .enter().append("g")
     .attr("class","legend")
+    .attr("data-point-type", (d)  => d)
     .attr("transform",function(d,i) {
+      console.log(d);
       return "translate(0," + i * 20 + ")";
     });
 
@@ -245,6 +248,16 @@ var appendLegend = function (svgID, legendScale, position='bottom') {
     .attr("dy",".35em")
     .style("text-anchor","end")
     .text(function(d) { return en2bn(d); });
+
+  legend.on("click", (d) => {
+    let clickedLegend = svg.select('.legend[data-point-type=' + d + ']');
+    clickedLegend.classed('legend-hidden', !clickedLegend.classed('legend-hidden'));
+    svg.selectAll('.' + d)
+      .transition().duration(900)
+      .style("visibility", () => { 
+        return clickedLegend.classed("legend-hidden") ? "hidden" : "visible";
+      })
+  })
 }
 
 var populateLineChart = function (data, svg) {
@@ -253,45 +266,10 @@ var populateLineChart = function (data, svg) {
   let xScale = d3.scaleTime().range([0, width]);
   let yScale = d3.scaleLinear().range([height, 0]);
 
-  let valueline_confirmed = d3.line().x(function (d) {
-      return xScale(d.date);
-    })
-    .y(function (d) {
-      return yScale(d.confirmed);
-    })
-    .curve(d3.curveMonotoneX);
-
-  let valueline_deaths = d3.line().x(function (d) {
-      return xScale(d.date);
-    })
-    .y(function (d) {
-      return yScale(d.deaths);
-    })
-    .curve(d3.curveMonotoneX);
-
-  let valueline_recovered = d3.line()
-    .x(function (d) { return xScale(d.date); })
-    .y(function (d) { return yScale(d.recovered); })
-    .curve(d3.curveMonotoneX);
 
   xScale.domain(d3.extent(data, function (d) { return d.date; }));
   yScale.domain([0, d3.max(data, function (d) { return Math.max(d.confirmed, d.recovered, d.deaths); })]);
 
-  // Add the valueline path.
-  path_c = svg.append("path")
-    .data([data])
-    .attr("class", "line line_c")
-    .attr("d", valueline_confirmed)
-
-  path_d = svg.append("path")
-    .data([data])
-    .attr("class", "line line_d")
-    .attr("d", valueline_deaths);
-
-  path_r = svg.append("path")
-    .data([data])
-    .attr("class", "line line_r")
-    .attr("d", valueline_recovered);
 
   svg.append("g")
     .attr("transform", "translate(0," + height + ")")
@@ -309,73 +287,50 @@ var populateLineChart = function (data, svg) {
   //.attr('y', -5)             
   //.text('Data taken from Johns Hopkins CSSE'); 
 
-  d3.select(".line_c")
-    .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength())
-    .attr("stroke-dashoffset", path_c.node().getTotalLength())
-    .transition(t)
-    .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["confirmed"]);
+  [
+    {lineClass: 'line_c', attrName: 'confirmed'},
+    {lineClass: 'line_d', attrName: 'recovered'},
+    {lineClass: 'line_r', attrName: 'deaths'}
+  ].forEach((dataPointGroup) => {
+    let valueline= d3.line()
+      .x(function (d) { return xScale(d.date); })
+      .y(function (d) { return yScale(d[dataPointGroup.attrName]); })
+      .curve(d3.curveMonotoneX);
 
-  d3.select(".line_d")
-    .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength())
-    .attr("stroke-dashoffset", path_d.node().getTotalLength())
-    .transition(t)
-    .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["deaths"]);
+    // Add the valueline path.
+    let path = svg.append("path")
+      .data([data])
+      .attr("class", "line " + dataPointGroup.attrName)
+      .attr("d", valueline)
 
-  d3.select(".line_r")
-    .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength())
-    .attr("stroke-dashoffset", path_r.node().getTotalLength())
-    .transition(t)
-    .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["recovered"]);
+    svg.select(".line." + dataPointGroup.attrName)
+      .attr("stroke-dasharray", path.node().getTotalLength() + " " + path.node().getTotalLength())
+      .attr("stroke-dashoffset", path.node().getTotalLength())
+      .transition(t)
+      .attr("stroke-dashoffset", 0)
+      .style("stroke", colors[dataPointGroup.attrName]);
 
-  svg.selectAll("dot")
-    .data(data)
-    .enter().append("circle")
-    .attr("r", 3)
-    .attr("cx", function (d) {
-      return xScale(d.date);
-    })
-    .attr("cy", function (d) {
-      return yScale(d.confirmed);
-    })
-    .style("fill", colors["confirmed"]);
-
-  svg.selectAll("dot")
-    .data(data)
-    .enter().append("circle")
-    .attr("r", 3)
-    .attr("cx", function (d) {
-      return xScale(d.date);
-    })
-    .attr("cy", function (d) {
-      return yScale(d.deaths);
-    })
-    .style("fill", colors["deaths"]);
+    svg.selectAll("dot")
+      .data(data)
+      .enter().append("circle")
+      .attr("r", 3)
+      .attr("cx", function (d) {
+        return xScale(d.date);
+      })
+      .attr("cy", function (d) {
+        return yScale(d[dataPointGroup.attrName]);
+      })
+      .style("fill", colors[dataPointGroup.attrName])
+      .attr("class", dataPointGroup.attrName);
+  });
 
 
-  svg.selectAll("dot")
-    .data(data)
-    .enter().append("circle")
-    .attr("r", 3)
-    .attr("cx", function (d) {
-      return xScale(d.date);
-    })
-    .attr("cy", function (d) {
-      return yScale(d.recovered);
-    })
-    .style("fill", colors["recovered"]);
-
-  let circleC = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
-  circleR = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
-  circleD = svg.append("circle") .attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL");
+  let circleC = svg.append("circle").attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
+    circleR = svg.append("circle").attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL"),
+    circleD = svg.append("circle").attr("cx", -10).attr("cy", -10).attr("r", 5).attr("class", "cPL");
 
   let getPointAtXaxis = function (xScale, yScale, d, line_type) {
     return [xScale(d.date), yScale(d[line_type])];
-  }
-
-  let drawLine = function(mouse) {
   }
 
   let mousemoved = function (data) {
@@ -404,17 +359,15 @@ var populateLineChart = function (data, svg) {
       ['.line_d', 'recovered'],
       ['.line_r', 'deaths']
     ].forEach((l) => {
-      // let line = svg.select(l[0]);
       p[l[1]] = getPointAtXaxis(xScale, yScale, d, l[1]);
     });
 
-  d3.select(".mouse-line")
-    .attr("d", function () {
-      let vLineData = "M" + xScale(d.date) + "," + Math.min.apply(null, Object.values(p).map(a => a[1]));
-      vLineData += " " + xScale(d.date) + "," + height;
-      console.log(vLineData);
-      return vLineData;
-    });
+    d3.select(".mouse-line")
+      .attr("d", function () {
+        let vLineData = "M" + xScale(d.date) + "," + Math.min.apply(null, Object.values(p).map(a => a[1]));
+        vLineData += " " + xScale(d.date) + "," + height;
+        return vLineData;
+      });
 
     Object.keys(p).forEach((k) => {
       if (k === 'confirmed') {
