@@ -266,45 +266,10 @@ var populateLineChart = function (data, svg) {
   let xScale = d3.scaleTime().range([0, width]);
   let yScale = d3.scaleLinear().range([height, 0]);
 
-  let valueline_confirmed = d3.line().x(function (d) {
-    return xScale(d.date);
-  })
-    .y(function (d) {
-      return yScale(d.confirmed);
-    })
-    .curve(d3.curveMonotoneX);
-
-  let valueline_deaths = d3.line().x(function (d) {
-    return xScale(d.date);
-  })
-    .y(function (d) {
-      return yScale(d.deaths);
-    })
-    .curve(d3.curveMonotoneX);
-
-  let valueline_recovered = d3.line()
-    .x(function (d) { return xScale(d.date); })
-    .y(function (d) { return yScale(d.recovered); })
-    .curve(d3.curveMonotoneX);
 
   xScale.domain(d3.extent(data, function (d) { return d.date; }));
   yScale.domain([0, d3.max(data, function (d) { return Math.max(d.confirmed, d.recovered, d.deaths); })]);
 
-  // Add the valueline path.
-  path_c = svg.append("path")
-    .data([data])
-    .attr("class", "line line_c")
-    .attr("d", valueline_confirmed)
-
-  path_d = svg.append("path")
-    .data([data])
-    .attr("class", "line line_d")
-    .attr("d", valueline_deaths);
-
-  path_r = svg.append("path")
-    .data([data])
-    .attr("class", "line line_r")
-    .attr("d", valueline_recovered);
 
   svg.append("g")
     .attr("transform", "translate(0," + height + ")")
@@ -322,32 +287,29 @@ var populateLineChart = function (data, svg) {
   //.attr('y', -5)             
   //.text('Data taken from Johns Hopkins CSSE'); 
 
-  d3.select(".line_c")
-    .attr("stroke-dasharray", path_c.node().getTotalLength() + " " + path_c.node().getTotalLength())
-    .attr("stroke-dashoffset", path_c.node().getTotalLength())
-    .transition(t)
-    .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["confirmed"]);
-
-  d3.select(".line_d")
-    .attr("stroke-dasharray", path_d.node().getTotalLength() + " " + path_d.node().getTotalLength())
-    .attr("stroke-dashoffset", path_d.node().getTotalLength())
-    .transition(t)
-    .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["deaths"]);
-
-  d3.select(".line_r")
-    .attr("stroke-dasharray", path_r.node().getTotalLength() + " " + path_r.node().getTotalLength())
-    .attr("stroke-dashoffset", path_r.node().getTotalLength())
-    .transition(t)
-    .attr("stroke-dashoffset", 0)
-    .style("stroke", colors["recovered"]);
-
   [
-    ['.line_c', 'confirmed'],
-    ['.line_d', 'recovered'],
-    ['.line_r', 'deaths']
+    {lineClass: 'line_c', attrName: 'confirmed'},
+    {lineClass: 'line_d', attrName: 'recovered'},
+    {lineClass: 'line_r', attrName: 'deaths'}
   ].forEach((dataPointGroup) => {
+    let valueline= d3.line()
+      .x(function (d) { return xScale(d.date); })
+      .y(function (d) { return yScale(d[dataPointGroup.attrName]); })
+      .curve(d3.curveMonotoneX);
+
+    // Add the valueline path.
+    let path = svg.append("path")
+      .data([data])
+      .attr("class", "line " + dataPointGroup.attrName)
+      .attr("d", valueline)
+
+    svg.select(".line." + dataPointGroup.attrName)
+      .attr("stroke-dasharray", path.node().getTotalLength() + " " + path.node().getTotalLength())
+      .attr("stroke-dashoffset", path.node().getTotalLength())
+      .transition(t)
+      .attr("stroke-dashoffset", 0)
+      .style("stroke", colors[dataPointGroup.attrName]);
+
     svg.selectAll("dot")
       .data(data)
       .enter().append("circle")
@@ -356,10 +318,10 @@ var populateLineChart = function (data, svg) {
         return xScale(d.date);
       })
       .attr("cy", function (d) {
-        return yScale(d[dataPointGroup[1]]);
+        return yScale(d[dataPointGroup.attrName]);
       })
-      .style("fill", colors[dataPointGroup[1]])
-      .attr("class", dataPointGroup[1]);
+      .style("fill", colors[dataPointGroup.attrName])
+      .attr("class", dataPointGroup.attrName);
   });
 
 
