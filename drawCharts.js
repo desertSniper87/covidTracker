@@ -22,6 +22,8 @@ const en2bnDict = {
   "NewRecovered": "দৈনিক নতুন সুস্থ",
 }
 
+var lineChartMaxAttr = d3.local();
+
 var en2bn = (d) => {
   if (!(d in en2bnDict)) {
     return iso3tobn[d];
@@ -257,15 +259,46 @@ var appendLegend = function (svgID, legendScale, position='bottom') {
       .style("visibility", () => { 
         return clickedLegend.classed("legend-hidden") ? "hidden" : "visible";
       })
+    // updateAxis(svg);
   })
+
+  let updateAxis = (svg) => {
+    let legendHidden = {};
+    let legends = svg.selectAll('.legend');
+    legends.nodes().forEach((l) => {
+      legendHidden[l.getAttribute('data-point-type')] = l.classList.contains('legend-hidden');
+    })
+
+    let maxAttr = JSON.parse(JSON.stringify(lineChartMaxAttr.get(this)));
+    Object.keys(legendHidden).forEach((k) => {
+      if (legendHidden[k] === true) 
+        delete maxAttr[k];
+    });
+
+    let yAxis = svg.selectAll('.y\\.axis');
+    let yScale = d3.scaleLinear()
+      .range([height, 0])
+      .domain([0, Math.max(Object.values(maxAttr))]);
+
+    yAxis.transition()
+      .duration(1000)
+      .call(d3.axisLeft(yScale));
+
+  }
 }
 
 var populateLineChart = function (data, svg) {
   svg.selectAll("*").remove();
 
+  lineChartMaxAttr.set(
+    this, {
+    confirmed: d3.max(data, d => Math.max(d.confirmed)),
+    deaths: d3.max(data, d => Math.max(d.deaths)),
+    recovered: d3.max(data, d => Math.max(d.recovered))
+  })
+
   let xScale = d3.scaleTime().range([0, width]);
   let yScale = d3.scaleLinear().range([height, 0]);
-
 
   xScale.domain(d3.extent(data, function (d) { return d.date; }));
   yScale.domain([0, d3.max(data, function (d) { return Math.max(d.confirmed, d.recovered, d.deaths); })]);
@@ -288,11 +321,11 @@ var populateLineChart = function (data, svg) {
   //.text('Data taken from Johns Hopkins CSSE'); 
 
   [
-    {lineClass: 'line_c', attrName: 'confirmed'},
-    {lineClass: 'line_d', attrName: 'recovered'},
-    {lineClass: 'line_r', attrName: 'deaths'}
+    { lineClass: 'line_c', attrName: 'confirmed' },
+    { lineClass: 'line_d', attrName: 'recovered' },
+    { lineClass: 'line_r', attrName: 'deaths' }
   ].forEach((dataPointGroup) => {
-    let valueline= d3.line()
+    let valueline = d3.line()
       .x(function (d) { return xScale(d.date); })
       .y(function (d) { return yScale(d[dataPointGroup.attrName]); })
       .curve(d3.curveMonotoneX);
