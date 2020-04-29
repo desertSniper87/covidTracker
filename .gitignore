@@ -1,4 +1,5 @@
 ./bnDailyTracker/iedecr_scrpr/env/*
+env/
 # Created by https://www.gitignore.io/api/python,vim,pycharm+all,jupyternotebooks
 # Edit at https://www.gitignore.io/?templates=python,vim,pycharm+all,jupyternotebooks
 
