@@ -2,4 +2,4 @@ jupyter
 ipykernel
 tabula-py
 pandas
-jupyterlab
+#jupyterlab
