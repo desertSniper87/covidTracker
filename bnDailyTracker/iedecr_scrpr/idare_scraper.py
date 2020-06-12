@@ -106,7 +106,7 @@ with open(f'{dir_path}/district.txt', 'w+') as f:
     json.dump(final_json, f, ensure_ascii=False)
 
 
-# In[15]:
+# In[1]:
 
 
 en2bn_dhk_area = {
@@ -350,7 +350,7 @@ print("Number of areas: ", len(dhaka_confirm_dict))
     
 
 
-# In[18]:
+# In[2]:
 
 
 import json
