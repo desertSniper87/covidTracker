@@ -14,6 +14,9 @@ from pprint import pprint
 import requests
 from bs4 import BeautifulSoup as bs
 
+date = 5
+month = 'july'
+month_n = 7
 
 iedcr2bcc_district = {
     "B. Baria": "Brahamanbaria",
@@ -60,9 +63,6 @@ for t in soup.body.find_all("tr"):
 print("Number of districts", len(district_confirm_dict))    
 pprint(district_confirm_dict)
 
-date = 29
-month = 'june'
-month_n = 6
 
 dir_path = f"./{month}/{date}"
 try:
